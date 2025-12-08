@@ -1,0 +1,10 @@
+# .gitignore
+.env
+__pycache__/
+*.pyc
+.venv/
+**/*.egg-info/     # Add this line
+dist/
+build/
+*.egg
+MeloTTS/ # MeloTTS model
