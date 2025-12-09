@@ -8,7 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
-from tts import PiperTTS
+from modules.tts import PiperTTS
 from dotenv import load_dotenv
 from decorators import log_duration
 load_dotenv()  # Auto-loads .env
