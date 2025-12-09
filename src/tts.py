@@ -6,7 +6,7 @@ import wave
 import logging
 from pathlib import Path
 load_dotenv()
-
+from decorators import log_duration
 
 class PiperTTS:
     def __init__(self, model_path=None):
@@ -30,6 +30,7 @@ class PiperTTS:
         )
         print(f"✅ Loaded Piper TTS: {model_path}")
 
+    @log_duration("Synthesize_voice")
     def synthesize_text(self, text) -> str:
         """Generate Spanish speech (WAV bytes)"""
         # Pass wav_buffer as parameter

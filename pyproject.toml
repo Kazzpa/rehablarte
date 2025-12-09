@@ -11,7 +11,9 @@ dependencies = [
     "aiogram==3.23.0",
     "python-dotenv",
     "piper-tts",     # Lightweight TTS (~50MB)
-    "onnxruntime"
+    "onnxruntime",
+    "faster-whisper",
+    "loguru"
 ]
 
 [project.scripts]

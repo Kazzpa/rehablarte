@@ -2,7 +2,6 @@ import asyncio
 import logging
 import sys
 import os
-
 from os import getenv
 from aiogram import Bot, Dispatcher,types, html, Router
 from aiogram.client.default import DefaultBotProperties
@@ -11,6 +10,7 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from tts import PiperTTS
 from dotenv import load_dotenv
+from decorators import log_duration
 load_dotenv()  # Auto-loads .env
 # Bot token can be obtained via https://t.me/BotFather
 TOKEN = getenv("BOT_TOKEN")
@@ -49,6 +49,7 @@ async def command_start_handler(message: Message) -> None:
 
 
 @router.message()
+@log_duration("TTS_Process")
 async def echo_handler(message: Message) -> None:
     """
     Handler will forward receive a message back to the sender
