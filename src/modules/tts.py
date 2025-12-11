@@ -56,6 +56,6 @@ if __name__ == "__main__":
     text = "¡Hola! Texto a voz súper ligero con Piper TTS."
     audio_bytes = tts.get_audio_bytes(text)
 
-    with open("test_spanish.wav", "wb") as f:
+    with open("../test_spanish.wav", "wb") as f:
         f.write(audio_bytes)
     print("✅ Saved test_spanish.wav")

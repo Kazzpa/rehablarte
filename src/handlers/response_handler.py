@@ -3,7 +3,7 @@ from loguru import logger
 from aiogram import types, Router
 from aiogram.types import Message
 from decorators import log_duration
-from tts import PiperTTS
+from modules.tts import PiperTTS
 
 # Router capturing all commands
 response_handler = Router()
