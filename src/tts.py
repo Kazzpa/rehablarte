@@ -1,12 +1,11 @@
 from piper import PiperVoice, SynthesisConfig
 from dotenv import load_dotenv
-import io
-import os
 import wave
 import logging
 from pathlib import Path
-load_dotenv()
 from decorators import log_duration
+
+load_dotenv()
 
 class PiperTTS:
     def __init__(self, model_path=None):
