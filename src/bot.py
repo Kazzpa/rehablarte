@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
-from handlers.member_commands import member_commands
+from handlers.member_commands import member_commands, setup_bot_commands
 from handlers.response_handler import response_handler
 
 load_dotenv()  # Auto-loads .env
@@ -27,6 +27,7 @@ bot = Bot(
 dp = Dispatcher()
 dp.include_router(member_commands)
 dp.include_router(response_handler)
+dp.startup.register(setup_bot_commands)
 
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
