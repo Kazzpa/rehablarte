@@ -1,6 +1,5 @@
 from loguru import logger
 import sys
-from pathlib import Path
 
 # Configure logger
 logger.remove()  # Remove default sink

@@ -3,8 +3,11 @@
 __pycache__/
 *.pyc
 .venv/
-**/*.egg-info/     # Add this line
+# Add this line
+**/**.egg-info/     
 dist/
 build/
 *.egg
 logs/
+.vscode/*
+src/voices/*
