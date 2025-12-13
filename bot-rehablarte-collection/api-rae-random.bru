@@ -1,0 +1,20 @@
+meta {
+  name: api-rae-random
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{rae-base-url}}{{rae-random}}
+  body: none
+  auth: inherit
+}
+
+params:query {
+  : 
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

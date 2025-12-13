@@ -9,6 +9,7 @@ from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 from handlers.member_commands import member_commands, setup_bot_commands
 from handlers.response_handler import response_handler
+from handlers.errors_handler import errors_router
 
 load_dotenv()  # Auto-loads .env
 
@@ -25,6 +26,8 @@ bot = Bot(
 
 # Configure dispatcher and set up commands/middlewares
 dp = Dispatcher()
+# Error hanlder must be before
+dp.include_router(errors_router)
 dp.include_router(member_commands)
 dp.include_router(response_handler)
 dp.startup.register(setup_bot_commands)
