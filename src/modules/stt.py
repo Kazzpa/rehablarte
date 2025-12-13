@@ -1,5 +1,4 @@
 from faster_whisper import WhisperModel
-import os
 from pathlib import Path
 from decorators import log_duration
 import multiprocessing
@@ -7,7 +6,6 @@ import multiprocessing
 class SpeechToText:
     def __init__(self, model_size="tiny"):
         """Load lightweight Faster-Whisper (Spanish optimized)"""
-        package_dir = Path(__file__).parent
         print(f"⏳ Loading STT model: {model_size}...")
 
         total_cores = multiprocessing.cpu_count()
@@ -24,7 +22,7 @@ class SpeechToText:
     @log_duration("Speech to text")
     def transcribe(self, audio_path):
         """Convert voice note → Spanish text"""
-        segments, info = self.model.transcribe(
+        segments = self.model.transcribe(
             audio_path,
             beam_size=1,  # Fast + low RAM
             language="es",  # Force Spanish
