@@ -20,37 +20,30 @@ tts = PiperTTS(model_path=MODEL_PATH)
 async def echo_handler(message: Message) -> None:
     """
     Handler will forward receive a message back to the sender
-
     By default, message handler will handle all message types (like a text, photo, sticker etc.)
     """
-    try:
-        logger.info("Executing TTS-Process")
-        # Send a copy of the received message
-        text = message.text
-        if not text:
-            await message.answer(f"Hola, {message.from_user.full_name}!, estoy esperando un mensaje de texto")
+    logger.info("Executing TTS-Process")
+    # Send a copy of the received message
+    text = message.text
+    if not text:
+        await message.answer(f"Hola, {message.from_user.full_name}!, estoy esperando un mensaje de texto")
 
-        status_msg = await message.answer("⏳ Generando audio...")
-        audio_bytes = tts.get_audio_bytes(text)
-        title_generated = message.from_user.first_name or "Usuario" + " generado"
-        await message.bot.send_audio(
-            chat_id=message.chat.id,
-            audio=types.input_file.BufferedInputFile(
-                file=audio_bytes,
-                filename="response.mp3"
-            ),
-            title=title_generated,
-            performer="RehablarTe Bot",
-            caption=f"🎵 {text[:50]}..."
-        )
+    status_msg = await message.answer("⏳ Generando audio...")
+    audio_bytes = tts.get_audio_bytes(text)
+    title_generated = message.from_user.first_name or "Usuario" + " generado"
+    await message.bot.send_audio(
+        chat_id=message.chat.id,
+        audio=types.input_file.BufferedInputFile(
+            file=audio_bytes,
+            filename="response.mp3"
+        ),
+        title=title_generated,
+        performer="RehablarTe Bot",
+        caption=f"🎵 {text[:50]}..."
+    )
 
 
-        await message.bot.delete_message(
-            chat_id=message.chat.id,
-            message_id=status_msg.message_id
-        )
-
-    except TypeError:
-        # But not all the types is supported to be copied so need to handle it
-        logger.error("Error in echo handlers processing text ...")
-        await message.answer("Ha habido un problema🥲")
+    await message.bot.delete_message(
+        chat_id=message.chat.id,
+        message_id=status_msg.message_id
+    )
