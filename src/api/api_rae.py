@@ -1,6 +1,7 @@
 import requests
 from loguru import logger
 from api.config import rae_api_url_base, rae_api_url_random, rae_api_url_words
+from models.palabra_entity import mapJsonToPalabra, mapJsonToOrigin, mapJsonToSense, Palabra
 
 async def get_rae_random() -> str:
     """
@@ -25,14 +26,14 @@ async def get_rae_random() -> str:
         if not resultJson or not resultJson.get("ok"):
             logger.error("Response returned empty string or null value")
             raise Exception(f"Response received: {resultJson} not valid")
-            
+
         return resultJson["data"]
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e
         
 
-async def get_rae_word(word: str) -> str:
+async def get_rae_word(word: str) -> Palabra:
     """
     Docstring for get_rae_word
     :param word: word to search
@@ -66,7 +67,8 @@ async def get_rae_word(word: str) -> str:
             logger.error("Response returned empty string or null value")
             raise Exception(f"Response received: {resultJson} not valid")
         
-        return resultJson["data"]
+        # Now map the object
+        return mapJsonToPalabra(resultJson["data"]["meanings"], resultJson["data"]["word"], resultJson["data"]["suggestions"])
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e

@@ -5,6 +5,7 @@ from aiogram.types import Message, BotCommand
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from api.api_rae import get_rae_random, get_rae_word
+from models.palabra_entity import Palabra, Sense, Origin
 
 # Group state for waiting on rae api
 class RaeState(StatesGroup):
@@ -105,11 +106,6 @@ async def process_word(message: Message, state: FSMContext) -> None:
         # Break flow here
         return
     # From here we parse the result and reply with desired text
-    meanings = rae_data["meanings"]
-    
-    # TODO: De momento devolvemos el primer significado
-    # Expandir esto en el futuro
-    # TODO: Implement DTO and mapping here
-    senses = meanings[0]["senses"]
-    result = senses[0]["description"]
-    await message.answer(f"El significado de {word} es {result}")
+    word = rae_data.word
+    shortDesc = rae_data.sensesList[0].description
+    await message.answer(f"El significado de {word} es {shortDesc}")
