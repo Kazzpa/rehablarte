@@ -1,5 +1,4 @@
 from faster_whisper import WhisperModel
-from pathlib import Path
 from decorators import log_duration
 import multiprocessing
 

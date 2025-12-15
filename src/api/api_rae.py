@@ -1,5 +1,4 @@
 import requests
-import json
 from loguru import logger
 from api.config import rae_api_url_base, rae_api_url_random, rae_api_url_words
 
