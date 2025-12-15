@@ -13,7 +13,8 @@ dependencies = [
     "piper-tts",     # Lightweight TTS (~50MB)
     "onnxruntime",
     "faster-whisper",
-    "loguru"
+    "loguru",
+    "requests"
 ]
 
 [project.scripts]
