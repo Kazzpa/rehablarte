@@ -19,10 +19,7 @@ if not TOKEN:
     raise ValueError("BOT_TOKEN not found in .env file!")
 
 # Bot defined globally (accessible to all handlers)
-bot = Bot(
-    token=TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-)
+bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 # Configure dispatcher and set up commands/middlewares
 dp = Dispatcher()
@@ -32,10 +29,11 @@ dp.include_router(member_commands)
 dp.include_router(response_handler)
 dp.startup.register(setup_bot_commands)
 
+
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    
+
     logger.info("Starting bot!")
 
     # And the run events dispatching
