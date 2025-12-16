@@ -8,6 +8,8 @@ errors_router = Router()
 """
 This handler will manage all global errors, for specific behaviours or custom exception add try/catch in command/event
 """
+
+
 @errors_router.errors()
 async def errors_handler(event: ErrorEvent):
     update: Update = event.update
@@ -22,4 +24,3 @@ async def errors_handler(event: ErrorEvent):
             await update.message.answer("❌ Ocurrió un error interno.")
     except Exception as send_error:
         logger.warning(f"Failed to send error message: {send_error}")
-

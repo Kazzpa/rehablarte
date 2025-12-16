@@ -14,7 +14,8 @@ dependencies = [
     "onnxruntime",
     "faster-whisper",
     "loguru",
-    "requests"
+    "requests",
+    "ruff"
 ]
 
 [project.scripts]
@@ -22,3 +23,7 @@ rehablarte = "rehablarte.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["F401","E501"]

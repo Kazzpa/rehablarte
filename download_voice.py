@@ -1,5 +1,6 @@
 from piper import download_voices
 from pathlib import Path
+
 DEFAULT_VOICE = "es_ES-davefx-medium"
 
 

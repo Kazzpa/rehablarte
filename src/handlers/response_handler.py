@@ -15,6 +15,7 @@ if not MODEL_PATH:
 tts = PiperTTS(model_path=MODEL_PATH)
 # All handlers should be attached to the Router (or Dispatcher)
 
+
 @response_handler.message()
 @log_duration("TTS_Process")
 async def echo_handler(message: Message) -> None:
@@ -26,7 +27,9 @@ async def echo_handler(message: Message) -> None:
     # Send a copy of the received message
     text = message.text
     if not text:
-        await message.answer(f"Hola, {message.from_user.full_name}!, estoy esperando un mensaje de texto")
+        await message.answer(
+            f"Hola, {message.from_user.full_name}!, estoy esperando un mensaje de texto"
+        )
 
     status_msg = await message.answer("⏳ Generando audio...")
     audio_bytes = tts.get_audio_bytes(text)
@@ -34,16 +37,13 @@ async def echo_handler(message: Message) -> None:
     await message.bot.send_audio(
         chat_id=message.chat.id,
         audio=types.input_file.BufferedInputFile(
-            file=audio_bytes,
-            filename="response.mp3"
+            file=audio_bytes, filename="response.mp3"
         ),
         title=title_generated,
         performer="RehablarTe Bot",
-        caption=f"🎵 {text[:50]}..."
+        caption=f"🎵 {text[:50]}...",
     )
 
-
     await message.bot.delete_message(
-        chat_id=message.chat.id,
-        message_id=status_msg.message_id
+        chat_id=message.chat.id, message_id=status_msg.message_id
     )
