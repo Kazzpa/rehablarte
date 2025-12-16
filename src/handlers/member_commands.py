@@ -57,6 +57,8 @@ async def command_help_handler(message: Message) -> None:
         Para obtener un audio de un texto tan solo mandame el audio.
         - /start: Iniciar bot.
         - /help: Comando para mostar este mensaje
+        - /aleatoria: Devuelve una palabra aleatoria de la RAE
+        - /palabra: Permite buscar el significado de una palabra en la RAE
         """
     await message.answer(helpText)
 
@@ -109,3 +111,5 @@ async def process_word(message: Message, state: FSMContext) -> None:
     word = rae_data.word
     shortDesc = rae_data.sensesList[0].description
     await message.answer(f"El significado de {word} es {shortDesc}")
+    # End state
+    await state.clear()
