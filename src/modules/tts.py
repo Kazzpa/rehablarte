@@ -22,12 +22,12 @@ class PiperTTS:
             model_path = "voices/es_ES-davefx-medium.onnx"
 
         self.voice = PiperVoice.load(model_path)
-        self.syn_config =  SynthesisConfig(
+        self.syn_config = SynthesisConfig(
             volume=1,  # half as loud
             length_scale=1.3,  # twice as slow
             noise_scale=0.6,  # more audio variation
             noise_w_scale=0.6,  # more speaking variation
-            normalize_audio=False, # use raw audio from voice
+            normalize_audio=False,  # use raw audio from voice
         )
         logger.info(f"✅ Loaded Piper TTS: {model_path}")
 
@@ -37,9 +37,10 @@ class PiperTTS:
         # Pass wav_buffer as parameter
         wav_path = "/tmp/audio.wav"
         with wave.open(wav_path, "wb") as wav_file:
-            self.voice.synthesize_wav(text, wav_file=wav_file, syn_config=self.syn_config)
+            self.voice.synthesize_wav(
+                text, wav_file=wav_file, syn_config=self.syn_config
+            )
         return wav_path
-
 
     def get_audio_bytes(self, text):
         """Get WAV bytes for Telegram"""

@@ -1,7 +1,7 @@
 from loguru import logger
 
 class Origin:
-    def __init__(self, raw, type, voice, text):
+    def __init__(self, raw: str, type: str, voice: str, text: str):
         """
         Docstring for __init__
         
@@ -17,7 +17,7 @@ class Origin:
         self.text = text
 
 class Sense:
-    def __init__(self, raw, category, usage, description, synonyms, antonyms):
+    def __init__(self , raw: str, category: str, usage: str, description: str, synonyms: str, antonyms: str):
         """
         Docstring for __init__
         

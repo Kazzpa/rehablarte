@@ -5,7 +5,6 @@ from aiogram.types import Message, BotCommand
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from api.api_rae import get_rae_random, get_rae_word
-from models.palabra_entity import Palabra, Sense, Origin
 
 # Group state for waiting on rae api
 class RaeState(StatesGroup):
@@ -17,22 +16,29 @@ async def setup_bot_commands(bot: Bot):
     """
     function to set up bot commands help text, call only once
     add below new commands
-    
+
     :param bot: Description
     :type bot: Bot
     """
     logger.info("Setting up bot commands")
     commands = [
-        BotCommand(command = "start", description = "Commando para iniciar el bot"),
-        BotCommand(command = "help", description = "Comando de ayuda del bot"),
-        BotCommand(command = "aleatoria", description = "Este comando devuelve una palabra aleatoria de la RAE"),
-        BotCommand(command = "palabra", description = "Busca el significado de una palabra en la RAE")
+        BotCommand(command="start", description="Commando para iniciar el bot"),
+        BotCommand(command="help", description="Comando de ayuda del bot"),
+        BotCommand(
+            command="aleatoria",
+            description="Este comando devuelve una palabra aleatoria de la RAE",
+        ),
+        BotCommand(
+            command="palabra",
+            description="Busca el significado de una palabra en la RAE",
+        ),
     ]
     await bot.set_my_commands(commands)
 
 
 # Router capturing all commands
 member_commands = Router()
+
 
 @member_commands.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
@@ -48,7 +54,7 @@ async def command_help_handler(message: Message) -> None:
     """
     Command to reply with bot functionallities
     Add explanation here with each functionality
-    
+
     :param message: Description
     :type message: Message
     """
@@ -61,6 +67,7 @@ async def command_help_handler(message: Message) -> None:
         - /palabra: Permite buscar el significado de una palabra en la RAE
         """
     await message.answer(helpText)
+
 
 @member_commands.message(Command("aleatoria"))
 async def command_random_handler(message: Message) -> None:
@@ -75,16 +82,18 @@ async def command_random_handler(message: Message) -> None:
     palabro = rae_data["word"]
     await message.answer(f"Toma palabro aleatorio: {palabro}")
 
+
 @member_commands.message(Command("palabra"))
 async def command_get_word(message: Message, state: FSMContext) -> None:
     """
     This function is the first step in FSM Context(event) and command for getting a palabra from RAE API
     """
     logger.info("Asking user for a word")
-    # Set the next state to waiting 
+    # Set the next state to waiting
     await state.set_state(RaeState.searchWord)
     await message.answer("¿Que palabra quieres buscar en la RAE?")
     logger.info("Waiting for user's input...")
+
 
 @member_commands.message(RaeState.searchWord)
 async def process_word(message: Message, state: FSMContext) -> None:
@@ -92,7 +101,7 @@ async def process_word(message: Message, state: FSMContext) -> None:
     This function is the second step in FSM context(event) for getting a word from RAE API
     """
     logger.info("updating state with user's input")
-    await state.update_data(word = message.text)
+    await state.update_data(word=message.text)
     await state.set_state(RaeState.searchWord)
     await message.answer("Espera le estoy preguntando a Reverte")
     word = message.text
@@ -101,15 +110,14 @@ async def process_word(message: Message, state: FSMContext) -> None:
     if not rae_data:
         logger.error("Error calling rae api")
         raise Exception("Error calling rae api for word")
-    # TODO: Move this to constant
+    # TODO: Move this to a constant
     if rae_data == "NOT_FOUND":
         logger.warning("Word not found in rae api")
         await message.answer(f"No se ha encontrado la palara {word}")
-        # Break flow here
-        return
-    # From here we parse the result and reply with desired text
-    word = rae_data.word
-    shortDesc = rae_data.sensesList[0].description
-    await message.answer(f"El significado de {word} es {shortDesc}")
+    else:
+        # From here we parse the result and reply with desired text
+        word = rae_data.word
+        shortDesc = rae_data.sensesList[0].description
+        await message.answer(f"El significado de {word} es {shortDesc}")
     # End state
     await state.clear()
