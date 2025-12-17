@@ -2,7 +2,6 @@ from faster_whisper import WhisperModel
 from decorators import log_duration
 import multiprocessing
 
-
 class SpeechToText:
     def __init__(self, model_size="tiny"):
         """Load lightweight Faster-Whisper (Spanish optimized)"""

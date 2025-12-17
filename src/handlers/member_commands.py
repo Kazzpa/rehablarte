@@ -6,11 +6,9 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from api.api_rae import get_rae_random, get_rae_word
 
-
 # Group state for waiting on rae api
 class RaeState(StatesGroup):
     searchWord = State()
-
 
 # this function set ups the help text in commands
 # Add here more commands
@@ -65,6 +63,8 @@ async def command_help_handler(message: Message) -> None:
         Para obtener un audio de un texto tan solo mandame el audio.
         - /start: Iniciar bot.
         - /help: Comando para mostar este mensaje
+        - /aleatoria: Devuelve una palabra aleatoria de la RAE
+        - /palabra: Permite buscar el significado de una palabra en la RAE
         """
     await message.answer(helpText)
 
@@ -110,18 +110,14 @@ async def process_word(message: Message, state: FSMContext) -> None:
     if not rae_data:
         logger.error("Error calling rae api")
         raise Exception("Error calling rae api for word")
-    # TODO: Move this to constant
+    # TODO: Move this to a constant
     if rae_data == "NOT_FOUND":
         logger.warning("Word not found in rae api")
         await message.answer(f"No se ha encontrado la palara {word}")
-        # Break flow here
-        return
-    # From here we parse the result and reply with desired text
-    meanings = rae_data["meanings"]
-
-    # TODO: De momento devolvemos el primer significado
-    # Expandir esto en el futuro
-    # TODO: Implement DTO and mapping here
-    senses = meanings[0]["senses"]
-    result = senses[0]["description"]
-    await message.answer(f"El significado de {word} es {result}")
+    else:
+        # From here we parse the result and reply with desired text
+        word = rae_data.word
+        shortDesc = rae_data.sensesList[0].description
+        await message.answer(f"El significado de {word} es {shortDesc}")
+    # End state
+    await state.clear()

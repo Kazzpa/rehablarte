@@ -1,23 +1,24 @@
 from piper import PiperVoice, SynthesisConfig
 from dotenv import load_dotenv
 import wave
-import logging
 from pathlib import Path
 from decorators import log_duration
+from loguru import logger
 
 load_dotenv()
-
 
 class PiperTTS:
     def __init__(self, model_path=None):
         """Load Piper Spanish voice"""
+        logger.info("Loading piperTTS")
 
-        package_dir = Path(__file__).parent
-        model_path = package_dir / "voices" / f"{model_path}.onnx"
-        print(model_path)
+        # TODO: Bug here solve later (the model path never exists)
+        package_dir = Path(__file__).parent.parent
+        model_path = package_dir / "voices" / model_path
+        logger.info(f"Model path: {model_path}")
 
         if not model_path.exists():
-            logging.debug("No model_path provided loading default model")
+            logger.debug("No model_path provided loading default model")
             model_path = "voices/es_ES-davefx-medium.onnx"
 
         self.voice = PiperVoice.load(model_path)
@@ -28,7 +29,7 @@ class PiperTTS:
             noise_w_scale=0.6,  # more speaking variation
             normalize_audio=False,  # use raw audio from voice
         )
-        print(f"✅ Loaded Piper TTS: {model_path}")
+        logger.info(f"✅ Loaded Piper TTS: {model_path}")
 
     @log_duration("Synthesize_voice")
     def synthesize_text(self, text) -> str:
@@ -60,4 +61,4 @@ if __name__ == "__main__":
 
     with open("../test_spanish.wav", "wb") as f:
         f.write(audio_bytes)
-    print("✅ Saved test_spanish.wav")
+    logger.info("✅ Saved test_spanish.wav")
