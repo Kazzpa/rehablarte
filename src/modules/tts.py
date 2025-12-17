@@ -13,8 +13,8 @@ class PiperTTS:
         logger.info("Loading piperTTS")
 
         # TODO: Bug here solve later (the model path never exists)
-        package_dir = Path(__file__).parent
-        model_path = package_dir / f"{model_path}"
+        package_dir = Path(__file__).parent.parent
+        model_path = package_dir / "voices" / model_path
         logger.info(f"Model path: {model_path}")
 
         if not model_path.exists():
