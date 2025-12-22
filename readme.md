@@ -37,4 +37,27 @@ In order to maintain clean code and
 ruff check
 ruff format
 ```
+## Docker
+
+You can also run this project using Docker or Docker Compose.
+Build and run with Docker
+
+To build the Docker image manually and run the container:
+
+```shell
+docker build -t rehablarte .
+docker run --env-file .env -v ./voices:/app/voices -p 8080:8080 --restart unless-stopped rehablarte
+```
+
+### Run with Docker Compose
+
+You can use the provided docker-compose.yml file for convenience
+Start the service with:
+```shell
+docker-compose up -d
+```
+To stop it:
+```shell
+docker-compose down
+```
 

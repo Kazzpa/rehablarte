@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  rehablarte:
+    image: kazzpa/rehablarte
+    env_file:
+      - .env
+    volumes:
+      - ./voices:/app/voices
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
