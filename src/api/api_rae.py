@@ -78,3 +78,12 @@ async def get_rae_word(word: str) -> Palabra:
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e
+
+# TODO: Finish this function
+async def get_rae_daily() -> Palabra:
+    """
+    Docstring for get_rae_daily
+    
+    :return: Description
+    :rtype: Palabra
+    """

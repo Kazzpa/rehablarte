@@ -32,6 +32,10 @@ async def setup_bot_commands(bot: Bot):
             command="palabra",
             description="Busca el significado de una palabra en la RAE",
         ),
+        BotCommand(
+            command="diaria",
+            description="Comando para llamar "
+        )
     ]
     await bot.set_my_commands(commands)
 
@@ -65,6 +69,7 @@ async def command_help_handler(message: Message) -> None:
         - /help: Comando para mostar este mensaje
         - /aleatoria: Devuelve una palabra aleatoria de la RAE
         - /palabra: Permite buscar el significado de una palabra en la RAE
+        - /diaria: Permite configurar la palabra diaria
         """
     await message.answer(helpText)
 
@@ -121,3 +126,12 @@ async def process_word(message: Message, state: FSMContext) -> None:
         await message.answer(f"El significado de {word} es {shortDesc}")
     # End state
     await state.clear()
+
+@member_commands.message(Command("diaria"))
+async def get_daily_word(message: Message) -> None:
+    """
+    Docstring for get_daily_word
+    
+    :param message: Description
+    :type message: Message
+    """
