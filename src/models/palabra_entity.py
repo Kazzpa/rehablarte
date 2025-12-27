@@ -58,7 +58,7 @@ class Palabra:
         self.suggestions = suggestions
 
 # For the mapper we expect a json with a defined structure as we will parse the values manually
-def mapJsonToPalabra(json: str, word: str, suggestionsStr: str) -> Palabra:
+def mapJsonToPalabra(meanings, word, suggestionsStr) -> Palabra:
     """
     Function to manually map json response from RAE API into an object
     :param json: data["meanings"] json in string
@@ -70,12 +70,14 @@ def mapJsonToPalabra(json: str, word: str, suggestionsStr: str) -> Palabra:
     """
     try:
         logger.info("Mapping to palabra")
-        if (len(json) > 1):
+        if (len(meanings) > 1):
+            # TODO: Improve this mapping so muiltiple meanigns are supported
             logger.warning("The meanings json had more than 1 result int the array, data missed")
-        origin = mapJsonToOrigin(json[0]["origin"])
+        originObj = meanings[0].get("origin")
+        origin = mapJsonToOrigin(originObj)
         suggestions = suggestionsStr
         sensesList = []
-        for sense in json[0]["senses"]:
+        for sense in meanings[0].get("senses"):
             sensesList.append(mapJsonToSense(sense))
         return Palabra(
             word = word,
@@ -87,42 +89,54 @@ def mapJsonToPalabra(json: str, word: str, suggestionsStr: str) -> Palabra:
         logger.error("Exception in mapper...")
         raise Exception("Exception in palabra mapper")
 
-def mapJsonToOrigin(json: str) -> Origin:
+def mapJsonToOrigin(json) -> Origin | None:
     """
     Function to manually map json data to Object
+    can return None if the json provided is null
     :param json: ["meanings"][0]["origin"]
     :type json: str
     :return: object
-    :rtype: Origin
+    :rtype: Origin | None
     """
     try:
         logger.info("Mapping to origin")
+        # En este caso la palabra no tiene origin
+        if(json == None):
+            logger.warning("Skipping origin mapping as it is missing")
+            return None
+        
         return Origin(
-            raw = json["raw"], 
-            type = json["type"], 
-            voice = json["voice"], 
-            text = json["text"])
+            raw = json.get("raw"), 
+            type = json.get("type"), 
+            voice = json.get("voice"), 
+            text = json.get("text"))
     except:
         logger.error("Exception in mapper...")
         raise Exception("Exception in origin mapper")
 
-def mapJsonToSense(json: str) -> Sense:
+def mapJsonToSense(json) -> Sense | None:
     try:
         """
         Function to manually map json data to Object
+        can return None if the json provided is null
         :param json: ["meanings"][0]["senses"]
         :type json: str
         :return: Sense Object
-        :rtype: Sense
+        :rtype: Sense | None
         """
         logger.info("Mapping to sense")
+        # En este caso la palabra no tiene sense
+        if(json == None):
+            logger.warning("Skipping sense mapping as it is missing")
+            return None
+        
         return Sense(
-            raw = json["raw"], 
-            category = json["category"], 
-            usage = json["usage"], 
-            description = json["description"], 
-            synonyms = json["synonyms"],
-            antonyms = json["antonyms"])
+            raw = json.get("raw"), 
+            category = json.get("category"), 
+            usage = json.get("usage"), 
+            description = json.get("description"), 
+            synonyms = json.get("synonyms"),
+            antonyms = json.get("antonyms"))
     except:
         logger.error("Exception in mapper...")
         raise Exception("Exception in sense mapper")
