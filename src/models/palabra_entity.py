@@ -58,7 +58,7 @@ class Palabra:
         self.suggestions = suggestions
 
 # For the mapper we expect a json with a defined structure as we will parse the values manually
-def mapJsonToPalabra(json: str, word: str, suggestionsStr: str) -> Palabra:
+def mapJsonToPalabra(word: str, json: str = None, suggestionsStr: str = None) -> Palabra:
     """
     Function to manually map json response from RAE API into an object
     :param json: data["meanings"] json in string
@@ -70,6 +70,12 @@ def mapJsonToPalabra(json: str, word: str, suggestionsStr: str) -> Palabra:
     """
     try:
         logger.info("Mapping to palabra")
+        ## TODO: FINISH PROPER MAPPING FOR RANDOM AND DAILY
+        if(json == None | suggestionsStr == None):
+            logger.info("Mappping simple response")
+            return Palabra(
+                word=word
+            )
         if (len(json) > 1):
             logger.warning("The meanings json had more than 1 result int the array, data missed")
         origin = mapJsonToOrigin(json[0]["origin"])

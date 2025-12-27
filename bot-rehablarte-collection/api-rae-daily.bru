@@ -1,0 +1,16 @@
+meta {
+  name: api-rae-daily
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{rae-base-url}}{{rae-daily}}
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

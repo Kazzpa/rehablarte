@@ -1,6 +1,6 @@
 import requests
 from loguru import logger
-from api.config import rae_api_url_base, rae_api_url_random, rae_api_url_words
+from api.config import rae_api_url_base, rae_api_url_random, rae_api_url_words, rae_api_url_daily
 from models.palabra_entity import mapJsonToPalabra, Palabra
 
 async def get_rae_random() -> str:
@@ -77,4 +77,37 @@ async def get_rae_word(word: str) -> Palabra:
         return mapJsonToPalabra(resultJson["data"]["meanings"], resultJson["data"]["word"], resultJson["data"]["suggestions"])
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
+        raise e
+
+# TODO: Finish this function
+async def get_rae_daily() -> Palabra:
+    """
+    Docstring for get_rae_daily
+    
+    :return: daily word (json) selected by the api
+    :rtype: Palabra
+    """
+    try:
+        logger.info("Calling API RAE - Daily")
+        # Define url
+        url = rae_api_url_base + rae_api_url_daily
+        headers = {"Accept": "application/json"}
+        # call the api
+        response = requests.get(url, headers=headers)
+
+        # If different response code log it and throw exception
+        if response.status_code != 200:
+            logger.error(f"Error in response, failed with status code: {response.status_code} in RAE API {url}")
+            raise Exception(f"Request failed with status code: {response.status_code}")
+
+        logger.info("Response received with success!")
+        # Parse the response
+        resultJson = response.json()
+        if not resultJson or not resultJson.get("ok"):
+            logger.error("Response returned empty string or null value")
+            raise Exception(f"Response received: {resultJson} not valid")
+
+        return resultJson.get("data")
+    except Exception as e:
+        logger.exception("Exception! - API RAE: ", extra={"url", url})
         raise e
