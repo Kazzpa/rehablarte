@@ -29,7 +29,7 @@ async def get_rae_random() -> str:
             logger.error("Response returned empty string or null value")
             raise Exception(f"Response received: {resultJson} not valid")
 
-        return resultJson["data"]
+        return resultJson.get("data")
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e
@@ -72,9 +72,13 @@ async def get_rae_word(word: str) -> Palabra:
         if not resultJson or not resultJson.get("ok"):
             logger.error("Response returned empty string or null value")
             raise Exception(f"Response received: {resultJson} not valid")
-        
+        # Mapping the json
+        resultData = resultJson.get("data")
+        if(resultData == None):
+            logger.error("Error gettin data json")
+            raise Exception(f"Error mapping subjson from api rae")
         # Now map the object
-        return mapJsonToPalabra(resultJson["data"]["meanings"], resultJson["data"]["word"], resultJson["data"]["suggestions"])
+        return mapJsonToPalabra(resultData.get("meanings"), resultData.get("word"), resultData.get("suggestions"))
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e
