@@ -3,9 +3,12 @@ WORKDIR /usr/local/app
 
 # Copy in the source code
 COPY src ./src
+COPY scripts/download_voice.py .
 # Install the application dependencies
 COPY pyproject.toml ./
 RUN pip install --no-cache-dir -e .
+RUN python download_voice.py --voice "es_ES-davefx-medium"
+COPY src/voices ./src/voices
 
 EXPOSE 8080
 
