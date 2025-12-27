@@ -2,7 +2,13 @@ from loguru import logger
 
 
 class Origin:
-    def __init__(self, raw: str, type: str, voice: str, text: str):
+    def __init__(
+        self,
+        raw: str,
+        type: str,
+        voice: str,
+        text: str,
+    ):
         """
         Docstring for __init__
 
@@ -50,7 +56,11 @@ class Sense:
 # Clase modelando el objeto padre
 class Palabra:
     def __init__(
-        self, word: str, sensesList: list[Sense], origin: Origin, suggestions: str
+        self,
+        word: str,
+        sensesList: list[Sense],
+        origin: Origin,
+        suggestions: str,
     ):
         """
         Docstring for __init__
@@ -94,7 +104,10 @@ def mapJsonToPalabra(json: str, word: str, suggestionsStr: str) -> Palabra:
         for sense in json[0]["senses"]:
             sensesList.append(mapJsonToSense(sense))
         return Palabra(
-            word=word, origin=origin, sensesList=sensesList, suggestions=suggestions
+            word=word,
+            origin=origin,
+            sensesList=sensesList,
+            suggestions=suggestions,
         )
     except KeyError as e:
         logger.exception("Exception in mapper...")
@@ -112,7 +125,10 @@ def mapJsonToOrigin(json: str) -> Origin:
     try:
         logger.info("Mapping to origin")
         return Origin(
-            raw=json["raw"], type=json["type"], voice=json["voice"], text=json["text"]
+            raw=json["raw"],
+            type=json["type"],
+            voice=json["voice"],
+            text=json["text"],
         )
     except KeyError as e:
         logger.exception("Exception in mapper...")
