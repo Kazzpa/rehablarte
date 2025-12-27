@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, BotCommand
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from api.api_rae import get_rae_random, get_rae_word
+from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
 
 # Group state for waiting on rae api
 class RaeState(StatesGroup):
@@ -73,6 +73,20 @@ async def command_help_handler(message: Message) -> None:
         """
     await message.answer(helpText)
 
+@member_commands.message(Command("diaria"))
+async def get_daily_word(message: Message) -> None:
+    """
+    Docstring for get_daily_word
+    command to get the daily word
+    
+    :param message: Description
+    :type message: Message
+    """
+    logger.info("Calling diaria command")
+    rae_data = await get_rae_daily()
+    palabro = rae_data.get("word")
+    await message.answer(f"El palabro de hoy es: {palabro}")
+
 
 @member_commands.message(Command("aleatoria"))
 async def command_random_handler(message: Message) -> None:
@@ -82,7 +96,7 @@ async def command_random_handler(message: Message) -> None:
     :param message: Description
     :type message: Message
     """
-    logger.info("Calling random comand")
+    logger.info("Calling random command")
     rae_data = await get_rae_random()
     palabro = rae_data["word"]
     await message.answer(f"Toma palabro aleatorio: {palabro}")
@@ -126,12 +140,3 @@ async def process_word(message: Message, state: FSMContext) -> None:
         await message.answer(f"El significado de {word} es {shortDesc}")
     # End state
     await state.clear()
-
-@member_commands.message(Command("diaria"))
-async def get_daily_word(message: Message) -> None:
-    """
-    Docstring for get_daily_word
-    
-    :param message: Description
-    :type message: Message
-    """
