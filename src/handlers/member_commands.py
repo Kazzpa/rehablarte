@@ -103,7 +103,7 @@ async def process_word(message: Message, state: FSMContext) -> None:
     logger.info("updating state with user's input")
     await state.update_data(word=message.text)
     await state.set_state(RaeState.searchWord)
-    await message.answer("Espera le estoy preguntando a Reverte")
+    temp_msg = await message.answer("Espera le estoy preguntando a Reverte")
     word = message.text
     logger.info(f"Searching for word '{word}' in API")
     rae_data = await get_rae_word(word)
@@ -121,3 +121,7 @@ async def process_word(message: Message, state: FSMContext) -> None:
         await message.answer(f"El significado de {word} es {shortDesc}")
     # End state
     await state.clear()
+    # Delete first message
+    await message.bot.delete_message(
+        chat_id=message.chat.id, message_id=temp_msg.message_id
+    )
