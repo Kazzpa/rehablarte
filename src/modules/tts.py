@@ -7,6 +7,7 @@ from loguru import logger
 
 load_dotenv()
 
+
 class PiperTTS:
     def __init__(self, model_path=None):
         """Load Piper Spanish voice"""

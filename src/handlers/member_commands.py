@@ -6,9 +6,11 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from api.api_rae import get_rae_random, get_rae_word
 
+
 # Group state for waiting on rae api
 class RaeState(StatesGroup):
     searchWord = State()
+
 
 # this function set ups the help text in commands
 # Add here more commands
