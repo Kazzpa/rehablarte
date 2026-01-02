@@ -1,10 +1,17 @@
 from loguru import logger
 
+
 class Origin:
-    def __init__(self, raw: str, type: str, voice: str, text: str):
+    def __init__(
+        self,
+        raw: str,
+        type: str,
+        voice: str,
+        text: str,
+    ):
         """
         Docstring for __init__
-        
+
         :param self: self
         :param raw: Procedencia de la palabra
         :param type: tipo
@@ -16,11 +23,20 @@ class Origin:
         self.voice = voice
         self.text = text
 
+
 class Sense:
-    def __init__(self , raw: str, category: str, usage: str, description: str, synonyms: str, antonyms: str):
+    def __init__(
+        self,
+        raw: str,
+        category: str,
+        usage: str,
+        description: str,
+        synonyms: str,
+        antonyms: str,
+    ):
         """
         Docstring for __init__
-        
+
         :param self: Description
         :param raw: Contenido la palabra en la rae
         :param category: Verb, noun, etc
@@ -36,18 +52,25 @@ class Sense:
         self.synonyms = synonyms
         self.antonyms = antonyms
 
+
 # Clase modelando el objeto padre
 class Palabra:
-    def __init__(self, word: str, sensesList: list[Sense], origin: Origin, suggestions: str):
+    def __init__(
+        self,
+        word: str,
+        sensesList: list[Sense],
+        origin: Origin,
+        suggestions: str,
+    ):
         """
         Docstring for __init__
-        
+
         :param self: self
         :param word: palabra de busqueda
         :type word: str
         :param sensesList: lista con los objectos con las definiciones
         :type sensesList: list[Sense]
-        :param origin: Objecto origen con la informacion de origen 
+        :param origin: Objecto origen con la informacion de origen
         :type origin: Origin
         :param suggestions: Unkown
         :type suggestions: str
@@ -56,6 +79,7 @@ class Palabra:
         self.origin = origin
         self.sensesList = sensesList
         self.suggestions = suggestions
+
 
 # For the mapper we expect a json with a defined structure as we will parse the values manually
 def mapJsonToPalabra(meanings, word, suggestionsStr) -> Palabra:
@@ -70,9 +94,11 @@ def mapJsonToPalabra(meanings, word, suggestionsStr) -> Palabra:
     """
     try:
         logger.info("Mapping to palabra")
-        if (len(meanings) > 1):
+        if len(meanings) > 1:
             # TODO: Improve this mapping so muiltiple meanigns are supported
-            logger.warning("The meanings json had more than 1 result int the array, data missed")
+            logger.warning(
+                "The meanings json had more than 1 result int the array, data missed"
+            )
         originObj = meanings[0].get("origin")
         origin = mapJsonToOrigin(originObj)
         suggestions = suggestionsStr
@@ -80,14 +106,15 @@ def mapJsonToPalabra(meanings, word, suggestionsStr) -> Palabra:
         for sense in meanings[0].get("senses"):
             sensesList.append(mapJsonToSense(sense))
         return Palabra(
-            word = word,
-            origin = origin,
-            sensesList = sensesList,
-            suggestions = suggestions
+            word=word,
+            origin=origin,
+            sensesList=sensesList,
+            suggestions=suggestions,
         )
-    except:
-        logger.error("Exception in mapper...")
-        raise Exception("Exception in palabra mapper")
+    except KeyError as e:
+        logger.exception("Exception in mapper...")
+        raise Exception("Exception in palabra mapper") from e
+
 
 def mapJsonToOrigin(json) -> Origin | None:
     """
@@ -101,18 +128,20 @@ def mapJsonToOrigin(json) -> Origin | None:
     try:
         logger.info("Mapping to origin")
         # En este caso la palabra no tiene origin
-        if(json == None):
+        if json is None:
             logger.warning("Skipping origin mapping as it is missing")
             return None
-        
+
         return Origin(
-            raw = json.get("raw"), 
-            type = json.get("type"), 
-            voice = json.get("voice"), 
-            text = json.get("text"))
-    except:
-        logger.error("Exception in mapper...")
-        raise Exception("Exception in origin mapper")
+            raw=json.get("raw"),
+            type=json.get("type"),
+            voice=json.get("voice"),
+            text=json.get("text"),
+        )
+    except KeyError as e:
+        logger.exception("Exception in mapper...")
+        raise Exception("Exception in origin mapper") from e
+
 
 def mapJsonToSense(json) -> Sense | None:
     try:
@@ -126,17 +155,18 @@ def mapJsonToSense(json) -> Sense | None:
         """
         logger.info("Mapping to sense")
         # En este caso la palabra no tiene sense
-        if(json == None):
+        if json is None:
             logger.warning("Skipping sense mapping as it is missing")
             return None
-        
+
         return Sense(
-            raw = json.get("raw"), 
-            category = json.get("category"), 
-            usage = json.get("usage"), 
-            description = json.get("description"), 
-            synonyms = json.get("synonyms"),
-            antonyms = json.get("antonyms"))
-    except:
-        logger.error("Exception in mapper...")
-        raise Exception("Exception in sense mapper")
+            raw=json.get("raw"),
+            category=json.get("category"),
+            usage=json.get("usage"),
+            description=json.get("description"),
+            synonyms=json.get("synonyms"),
+            antonyms=json.get("antonyms"),
+        )
+    except KeyError as e:
+        logger.exception("Exception in mapper...")
+        raise Exception("Exception in sense mapper") from e

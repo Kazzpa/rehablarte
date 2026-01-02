@@ -3,6 +3,7 @@ from loguru import logger
 from api.config import rae_api_url_base, rae_api_url_random, rae_api_url_words
 from models.palabra_entity import mapJsonToPalabra, Palabra
 
+
 async def get_rae_random() -> str:
     """
     This function call RAE API random endpoint and returns the data with the word
@@ -74,11 +75,15 @@ async def get_rae_word(word: str) -> Palabra:
             raise Exception(f"Response received: {resultJson} not valid")
         # Mapping the json
         resultData = resultJson.get("data")
-        if(resultData == None):
+        if resultData is None:
             logger.error("Error gettin data json")
-            raise Exception(f"Error mapping subjson from api rae")
+            raise Exception("Error mapping subjson from api rae")
         # Now map the object
-        return mapJsonToPalabra(resultData.get("meanings"), resultData.get("word"), resultData.get("suggestions"))
+        return mapJsonToPalabra(
+            resultData.get("meanings"),
+            resultData.get("word"),
+            resultData.get("suggestions"),
+        )
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e
