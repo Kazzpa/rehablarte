@@ -59,8 +59,8 @@ class Palabra:
         self,
         word: str,
         sensesList: list[Sense],
-        origin: Origin,
-        suggestions: str,
+        origin: Origin = None,
+        suggestions: str = None,
     ):
         """
         Docstring for __init__
@@ -82,7 +82,7 @@ class Palabra:
 
 
 # For the mapper we expect a json with a defined structure as we will parse the values manually
-def mapJsonToPalabra(meanings, word, suggestionsStr) -> Palabra:
+def mapJsonToPalabra(meanings, word, suggestionsStr=None) -> Palabra:
     """
     Function to manually map json response from RAE API into an object
     :param json: data["meanings"] json in string
@@ -101,15 +101,25 @@ def mapJsonToPalabra(meanings, word, suggestionsStr) -> Palabra:
             )
         originObj = meanings[0].get("origin")
         origin = mapJsonToOrigin(originObj)
-        suggestions = suggestionsStr
         sensesList = []
         for sense in meanings[0].get("senses"):
             sensesList.append(mapJsonToSense(sense))
+
+        ## TODO: FINISH PROPER MAPPING FOR RANDOM AND DAILY
+        ## if suggestions is null, do not add it to the object as we need to return senses always
+        if suggestionsStr is None:
+            logger.info("Mappping simple response")
+            return Palabra(
+                word=word,
+                origin=origin,
+                sensesList=sensesList,
+            )
+
         return Palabra(
             word=word,
             origin=origin,
             sensesList=sensesList,
-            suggestions=suggestions,
+            suggestions=suggestionsStr,
         )
     except KeyError as e:
         logger.exception("Exception in mapper...")
