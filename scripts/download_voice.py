@@ -6,6 +6,7 @@ import os
 DEFAULT_VOICE = "es_ES-davefx-medium"
 load_dotenv()
 
+
 def main(**kwargs):
     voice = os.getenv("MODEL_PATH") or kwargs.get("voice", DEFAULT_VOICE)
     voices_path = Path("../src/voices")
