@@ -6,9 +6,11 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
 
+
 # Group state for waiting on rae api
 class RaeState(StatesGroup):
     searchWord = State()
+
 
 # this function set ups the help text in commands
 # Add here more commands
@@ -32,10 +34,7 @@ async def setup_bot_commands(bot: Bot):
             command="palabra",
             description="Busca el significado de una palabra en la RAE",
         ),
-        BotCommand(
-            command="diaria",
-            description="Comando para llamar "
-        )
+        BotCommand(command="diaria", description="Comando para llamar "),
     ]
     await bot.set_my_commands(commands)
 
@@ -73,12 +72,13 @@ async def command_help_handler(message: Message) -> None:
         """
     await message.answer(helpText)
 
+
 @member_commands.message(Command("diaria"))
 async def get_daily_word(message: Message) -> None:
     """
     Docstring for get_daily_word
     command to get the daily word
-    
+
     :param message: Description
     :type message: Message
     """
@@ -122,7 +122,7 @@ async def process_word(message: Message, state: FSMContext) -> None:
     logger.info("updating state with user's input")
     await state.update_data(word=message.text)
     await state.set_state(RaeState.searchWord)
-    await message.answer("Espera le estoy preguntando a Reverte")
+    temp_msg = await message.answer("Espera le estoy preguntando a Reverte")
     word = message.text
     logger.info(f"Searching for word '{word}' in API")
     rae_data = await get_rae_word(word)
@@ -140,3 +140,7 @@ async def process_word(message: Message, state: FSMContext) -> None:
         await message.answer(f"El significado de {word} es {shortDesc}")
     # End state
     await state.clear()
+    # Delete first message
+    await message.bot.delete_message(
+        chat_id=message.chat.id, message_id=temp_msg.message_id
+    )

@@ -1,7 +1,13 @@
 import requests
 from loguru import logger
-from api.config import rae_api_url_base, rae_api_url_random, rae_api_url_words, rae_api_url_daily
+from api.config import (
+    rae_api_url_base,
+    rae_api_url_random,
+    rae_api_url_words,
+    rae_api_url_daily,
+)
 from models.palabra_entity import mapJsonToPalabra, Palabra
+
 
 async def get_rae_random() -> str:
     """
@@ -29,7 +35,7 @@ async def get_rae_random() -> str:
             logger.error("Response returned empty string or null value")
             raise Exception(f"Response received: {resultJson} not valid")
 
-        return resultJson["data"]
+        return resultJson.get("data")
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e
@@ -72,18 +78,27 @@ async def get_rae_word(word: str) -> Palabra:
         if not resultJson or not resultJson.get("ok"):
             logger.error("Response returned empty string or null value")
             raise Exception(f"Response received: {resultJson} not valid")
-        
+        # Mapping the json
+        resultData = resultJson.get("data")
+        if resultData is None:
+            logger.error("Error gettin data json")
+            raise Exception("Error mapping subjson from api rae")
         # Now map the object
-        return mapJsonToPalabra(resultJson["data"]["meanings"], resultJson["data"]["word"], resultJson["data"]["suggestions"])
+        return mapJsonToPalabra(
+            resultData.get("meanings"),
+            resultData.get("word"),
+            resultData.get("suggestions"),
+        )
     except Exception as e:
         logger.exception("Exception! - API RAE: ", extra={"url": url})
         raise e
+
 
 # TODO: Finish this function
 async def get_rae_daily() -> Palabra:
     """
     Docstring for get_rae_daily
-    
+
     :return: daily word (json) selected by the api
     :rtype: Palabra
     """
@@ -97,7 +112,9 @@ async def get_rae_daily() -> Palabra:
 
         # If different response code log it and throw exception
         if response.status_code != 200:
-            logger.error(f"Error in response, failed with status code: {response.status_code} in RAE API {url}")
+            logger.error(
+                f"Error in response, failed with status code: {response.status_code} in RAE API {url}"
+            )
             raise Exception(f"Request failed with status code: {response.status_code}")
 
         logger.info("Response received with success!")
