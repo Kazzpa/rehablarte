@@ -13,7 +13,6 @@ class PiperTTS:
         """Load Piper Spanish voice"""
         logger.info("Loading piperTTS")
 
-        # TODO: Bug here solve later (the model path never exists)
         package_dir = Path(__file__).parent.parent
         model_path = package_dir / "voices" / model_path
         logger.info(f"Model path: {model_path}")

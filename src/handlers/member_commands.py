@@ -2,14 +2,11 @@ from loguru import logger
 from aiogram import html, Router, Bot
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, BotCommand
-from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
-
-
-# Group state for waiting on rae api
-class RaeState(StatesGroup):
-    searchWord = State()
+#TODO: REMOVE - Testing
+from handlers.fsm_conversation_handler import RaeState, DailyMenuFlow
+from handlers.menu_handler import buildKeyboardMenu, buildDiariaKeyboardMenu
 
 
 # this function set ups the help text in commands
@@ -35,6 +32,7 @@ async def setup_bot_commands(bot: Bot):
             description="Busca el significado de una palabra en la RAE",
         ),
         BotCommand(command="diaria", description="Comando para llamar "),
+        BotCommand(command="setdiaria", description="Permite configurar el comportamiento de la palabra diaria")
     ]
     await bot.set_my_commands(commands)
 
@@ -68,11 +66,12 @@ async def command_help_handler(message: Message) -> None:
         - /help: Comando para mostar este mensaje
         - /aleatoria: Devuelve una palabra aleatoria de la RAE
         - /palabra: Permite buscar el significado de una palabra en la RAE
-        - /diaria: Permite configurar la palabra diaria
+        - /diaria: devuelve la palabra diaria
+        - /setdiaria: Permite configurar el comportamiento de la palabra diaria
         """
     await message.answer(helpText)
 
-
+# TODO: Finish this command so instead of returning directly the word a config menu is called
 @member_commands.message(Command("diaria"))
 async def get_daily_word(message: Message) -> None:
     """
@@ -87,6 +86,26 @@ async def get_daily_word(message: Message) -> None:
     palabro = rae_data.get("word")
     await message.answer(f"El palabro de hoy es: {palabro}")
 
+@member_commands.message(Command("setdiaria"))
+async def config_daily_word(message: Message, state: FSMContext) -> None:
+    """
+    """
+    logger.info("Calling config of diaria word")
+    
+    # Get the keyboard, set state inside
+    await buildDiariaKeyboardMenu(message, state)
+
+    # await message.answer("¿Que quieres configurar?") 
+
+    # TODO: Set a constant to store the value of the word (avoiding multiple api calls)
+
+    # Set a FSM with menu
+
+
+# TODO: REMOVE Testing menu FSM
+@member_commands.message(Command("testmenu"))
+async def testMenu(message: Message) -> None:
+    await buildKeyboardMenu(message)
 
 @member_commands.message(Command("aleatoria"))
 async def command_random_handler(message: Message) -> None:
@@ -101,7 +120,7 @@ async def command_random_handler(message: Message) -> None:
     palabro = rae_data["word"]
     await message.answer(f"Toma palabro aleatorio: {palabro}")
 
-
+# TODO: Refator these functions so more logic is moved to the conversation handler
 @member_commands.message(Command("palabra"))
 async def command_get_word(message: Message, state: FSMContext) -> None:
     """

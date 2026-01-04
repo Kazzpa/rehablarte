@@ -94,7 +94,6 @@ async def get_rae_word(word: str) -> Palabra:
         raise e
 
 
-# TODO: Finish this function
 async def get_rae_daily() -> Palabra:
     """
     Docstring for get_rae_daily
