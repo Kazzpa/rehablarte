@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from handlers.member_commands import member_commands, setup_bot_commands
 from handlers.response_handler import response_handler
 from handlers.errors_handler import errors_router
-from handlers.menu_handler import menu_test_router, daily_config_router
+from handlers.conversation_handler import daily_config_router
 
 load_dotenv()  # Auto-loads .env
 
@@ -28,8 +28,6 @@ dp = Dispatcher()
 dp.include_router(errors_router)
 dp.include_router(member_commands)
 dp.include_router(daily_config_router)
-# TODO: Remove this for testing only
-dp.include_router(menu_test_router)
 dp.include_router(response_handler)
 dp.startup.register(setup_bot_commands)
 

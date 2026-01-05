@@ -4,9 +4,8 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, BotCommand
 from aiogram.fsm.context import FSMContext
 from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
-#TODO: REMOVE - Testing
-from handlers.fsm_conversation_handler import RaeState, DailyMenuFlow
-from handlers.menu_handler import buildKeyboardMenu, buildDiariaKeyboardMenu
+from handlers.fsm_conversation_handler import RaeState
+from handlers.keyboards_handler import buildDiariaKeyboardMenu
 
 
 # this function set ups the help text in commands
@@ -101,11 +100,6 @@ async def config_daily_word(message: Message, state: FSMContext) -> None:
 
     # Set a FSM with menu
 
-
-# TODO: REMOVE Testing menu FSM
-@member_commands.message(Command("testmenu"))
-async def testMenu(message: Message) -> None:
-    await buildKeyboardMenu(message)
 
 @member_commands.message(Command("aleatoria"))
 async def command_random_handler(message: Message) -> None:
