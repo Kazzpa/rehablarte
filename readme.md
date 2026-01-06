@@ -2,7 +2,11 @@
 
 -----
 
-Project to build a free telegram bot that is able to process text to speech and viceversa.
+**WIP** Python telegram bot.   
+Currently has these features:  
+- Text to speech model
+- Rae Api: Daily word and requested word meaning
+- Cached results
 
 -----
 
@@ -13,9 +17,14 @@ need to set up an .env file with this values
 
 ``` 
 MODEL_PATH=es_ES-davefx-medium.onnx
-BOT_TOKEN={your-token-here}
+BOT_TOKEN={your-bot-father-token-here}
+
+# REDIS DB
+REDIS_HOST=rehablarte-cache
+REDIS_PORT=6379
+REDIS_PASSWORD={your-redis-password-here}
 ```
-### Install libraries
+### Install project dependencies
 
 It will install libraries form pyproject.toml
 ```shell
@@ -32,12 +41,14 @@ python scripts/download_voice.py
 python bot.py
 ```
 ## Code formatter and linter
-In order to maintain clean code and 
+In order to maintain clean code and format code
 ``` 
 ruff check
 ruff format
 ```
-## Docker
+## Development
+
+### Docker
 
 You can also run this project using Docker or Docker Compose.
 Build and run with Docker

@@ -2,6 +2,7 @@ version: '3.8'
 services:
   rehablarte:
     image: kazzpa/rehablarte
+    build: .
     env_file:
       - .env
     volumes:
@@ -9,3 +10,40 @@ services:
     ports:
       - "8080:8080"
     restart: unless-stopped
+    networks:
+      - redis-network
+
+  rehablarte-cache:
+    image: redis:8.4.0-bookworm
+    volumes:
+      - cache:/data
+    command: >
+      redis-server 
+      --save 20 1 
+      --loglevel warning 
+      --requirepass ${REDIS_PASSWORD}
+      --enable-debug-command local
+    restart: always
+    ports:
+      - '6379:6379'
+    networks:
+      - redis-network
+
+  redis-gui:
+    image: redis/redisinsight
+    volumes:
+      - redisinsight:/data
+    depends_on:
+      - rehablarte-cache
+    ports:
+      - '5540:5540'
+
+volumes:
+  cache:
+    driver: local
+  redisinsight:
+    driver: local
+
+networks:
+  redis-network:
+    driver: bridge
