@@ -33,9 +33,9 @@ async def echo_handler(message: Message) -> None:
         )
 
     status_msg = await message.answer("⏳ Generando audio...")
-    cache_key = f"TTS:{text}"
+    cache_key = f"TTS:{text.lower().strip()}"
 
-    audio_bytes = cached_api_call(
+    audio_bytes = await cached_api_call(
         cache_key=cache_key,
         api_function=tts.get_audio_bytes,
         text=text,
