@@ -30,10 +30,11 @@ dp.include_router(response_handler)
 dp.startup.register(setup_bot_commands)
 
 
+
+
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
     logger.info("Starting bot!")
 
     # And the run events dispatching
