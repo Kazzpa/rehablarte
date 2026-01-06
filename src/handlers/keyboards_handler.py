@@ -26,6 +26,7 @@ async def buildDiariaKeyboardMenu(message: Message, state: FSMContext) -> None:
                     InlineKeyboardButton(text="Origen de la palabra", callback_data="origin")
                 ],
                 [
+                    InlineKeyboardButton(text="✅​ Finalizar", callback_data="confirm"),
                     InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")
                 ]
             ]
@@ -34,7 +35,7 @@ async def buildDiariaKeyboardMenu(message: Message, state: FSMContext) -> None:
         # set first state
         await state.set_state(DailyMenuFlow.config_choosing)
 
-        await message.answer("Que opcion quieres configurar?", reply_markup=keyboard)
+        await message.answer("¿Que opcion quieres configurar?", reply_markup=keyboard)
     except Exception as e:
         # TODO: Replace with custom exception for menus
         logger.exception("Exception!")
@@ -45,23 +46,47 @@ async def buildDiariaRepeatKeyboardMenu(message: Message, state: FSMContext) -> 
     """
     try:
         logger.info("Building repeat diaria word keyboard")
-        keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-                [
-                    InlineKeyboardButton(text="Si", callback_data="yes_repeat"),
-                    InlineKeyboardButton(text="No", callback_data="no_repeat")
-                ],
-                [
-                    InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")
-                ]
-            ]
-        )
-    
-        # set first state
-        await state.set_state(DailyMenuFlow.config_choosing)
+        keyboard = buildGenericResponseKeyboard()
 
         await message.answer("¿Quieres que la palabra diaria se repita a lo largo del día?", reply_markup=keyboard)
     except Exception as e:
         # TODO: Replace with custom exception for menus
         logger.exception("Exception!")
         raise e
+    
+async def buildNumberOfRepeatsKeyboardMenu() -> InlineKeyboardMarkup:
+    try:
+        logger.info("Building repeat number keyboard")
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="1", callback_data="1"),
+                    InlineKeyboardButton(text="2", callback_data="2"),
+                    InlineKeyboardButton(text="3", callback_data="3"),
+                    InlineKeyboardButton(text="4", callback_data="4")
+                ],
+                [
+                    InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")
+                ]
+            ]
+        )
+        return keyboard
+    except Exception as e:
+        # TODO: Replace with custom exception for menus
+        logger.exception("Exception!")
+        raise e
+
+# Generic function to generate a yes/no keyboard
+async def buildGenericResponseKeyboard() -> InlineKeyboardMarkup:
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="Si", callback_data="yes"),
+                    InlineKeyboardButton(text="No", callback_data="no")
+                ],
+                [
+                    InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")
+                ]
+            ]
+    )
+    return keyboard

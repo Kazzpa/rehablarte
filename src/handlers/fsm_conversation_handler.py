@@ -8,3 +8,4 @@ class RaeState(StatesGroup):
 class DailyMenuFlow(StatesGroup):
     config_choosing = State()
     confirming = State()
+    

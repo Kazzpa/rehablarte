@@ -3,6 +3,7 @@ from aiogram import html, Router, Bot
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, BotCommand
 from aiogram.fsm.context import FSMContext
+from utils.redis_cache import cached_api_call 
 from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
 from handlers.fsm_conversation_handler import RaeState
 from handlers.keyboards_handler import buildDiariaKeyboardMenu
@@ -90,7 +91,7 @@ async def config_daily_word(message: Message, state: FSMContext) -> None:
     """
     """
     logger.info("Calling config of diaria word")
-    
+
     # Get the keyboard, set state inside
     await buildDiariaKeyboardMenu(message, state)
 

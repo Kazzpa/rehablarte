@@ -19,9 +19,6 @@ TOKEN = getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("BOT_TOKEN not found in .env file!")
 
-# Bot defined globally (accessible to all handlers)
-bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-
 # Configure dispatcher and set up commands/middlewares
 dp = Dispatcher()
 # Error hanlder must be before

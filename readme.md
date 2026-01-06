@@ -72,3 +72,17 @@ To stop it:
 docker-compose down
 ```
 
+### Build only redis db
+
+build only the DB
+
+```shell
+docker build -t rehablarte-cache .
+```
+
+Run only the DB
+```shell
+docker compose up rehablarte-cache
+```
+
+
