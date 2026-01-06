@@ -3,6 +3,7 @@ from loguru import logger
 import redis
 import pickle
 
+
 def cached_api_call(cache_key, api_function, *args, ttl=600, **kwargs):
     # Try to get from cache
     try:
@@ -16,10 +17,9 @@ def cached_api_call(cache_key, api_function, *args, ttl=600, **kwargs):
     result = api_function(*args, **kwargs)
 
     # Store in Redis with expiration
-    if ttl > 0 :
+    if ttl > 0:
         redis_client.setex(cache_key, ttl, pickle.dumps(result))
     # Save forever
     else:
         redis_client.set(cache_key, pickle.dumps(result))
     return result
-
