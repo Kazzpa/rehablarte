@@ -32,7 +32,9 @@ class SpeechToText:
             word_timestamps=False,
         )
         if segments:
-            transcribed_text = " ".join([segment.text.strip() for segment in segments[0]]).strip()
+            transcribed_text = " ".join(
+                [segment.text.strip() for segment in segments[0]]
+            ).strip()
         else:
             logger.warning("No se detecto voz")
             transcribed_text = "[No se detectó voz]"

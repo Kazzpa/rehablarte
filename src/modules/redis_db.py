@@ -7,6 +7,7 @@ from decorators import log_duration
 
 load_dotenv()
 
+
 @log_duration("Redis: Init")
 def create_redis_client() -> redis.Redis:
     redis_host = getenv("REDIS_HOST")

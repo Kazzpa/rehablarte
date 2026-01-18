@@ -17,6 +17,7 @@ if not MODEL_PATH:
 tts = PiperTTS(model_path=MODEL_PATH)
 stt = SpeechToText()
 
+
 # All handlers should be attached to the Router (or Dispatcher)
 @response_handler.message(F.text)
 @log_duration("Text handler")
@@ -74,7 +75,7 @@ async def audio_file_handler(message: Message) -> None:
     status_msg = await message.answer("⏳ Transcribiendo audio...")
     audio_file = await message.bot.get_file(audio_object.file_id)
     audio_path = audio_file.file_path
-    download_path = audio_path.split('/')[-1]
+    download_path = audio_path.split("/")[-1]
     await message.bot.download_file(audio_path, download_path)
     transcribed_text = await stt.transcribe(audio_path=download_path)
     # Remove downloaded_audio
@@ -84,6 +85,7 @@ async def audio_file_handler(message: Message) -> None:
     )
 
     await message.answer(transcribed_text)
+
 
 @response_handler.message()
 async def handle_unknown_content(message: Message):

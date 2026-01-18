@@ -115,6 +115,7 @@ async def command_get_word(message: Message, state: FSMContext) -> None:
     await message.answer("¿Que palabra quieres buscar en la RAE?")
     logger.info("Waiting for user's input...")
 
+
 @log_duration("RAE:Process_word")
 @member_commands.message(RaeState.searchWord)
 async def process_word(message: Message, state: FSMContext) -> None:
