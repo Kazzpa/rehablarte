@@ -3,10 +3,11 @@ import redis
 from loguru import logger
 from os import getenv
 from dotenv import load_dotenv
+from decorators import log_duration
 
 load_dotenv()
 
-
+@log_duration("Redis: Init")
 def create_redis_client() -> redis.Redis:
     redis_host = getenv("REDIS_HOST")
     redis_port = getenv("REDIS_PORT", 6379)
