@@ -5,7 +5,7 @@ import redis
 import pickle
 
 
-async def cached_api_call(cache_key, api_function, *args, ttl=600, **kwargs):
+async def cached_api_call(cache_key: str, api_function, *args, ttl=600, **kwargs):
     # Try to get from cache
     try:
         cached = await redis_client.get(cache_key)
