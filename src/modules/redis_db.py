@@ -1,4 +1,5 @@
 from redis import asyncio as aioredis
+from aiogram.fsm.storage.redis import RedisStorage
 import redis
 from loguru import logger
 from os import getenv
@@ -24,3 +25,6 @@ def create_redis_client() -> redis.Redis:
 
 
 redis_client = create_redis_client()
+
+# Storage to manage memory session
+storage = RedisStorage(redis=redis_client)
