@@ -4,6 +4,7 @@ from aiogram.types.chat import Chat
 from aiogram.fsm.context import FSMContext
 from utils.session import initialize_session
 
+
 class InitializeSessionMiddleware(BaseMiddleware):
     async def __call__(self, handler, event, data):
         logger.info("In initialization middleware")

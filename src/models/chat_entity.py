@@ -7,29 +7,36 @@ from datetime import datetime
 class ReChatMember(BaseModel):
     id: int
     username: str
-    status: Literal["creator", "administrator", "member", "restricted", "left", "kicked"] # TODO: Maybe move this to a global so it can be reused in the future?
+    status: Literal[
+        "creator", "administrator", "member", "restricted", "left", "kicked"
+    ]  # TODO: Maybe move this to a global so it can be reused in the future?
     joinedAt: datetime
-    is_bot: bool = False # Use this attribute to ignore text from other bots
+    is_bot: bool = False  # Use this attribute to ignore text from other bots
+
 
 class ReChat(BaseModel):
     id: int
     firstInteraction: datetime
     kind: Literal["base", "private", "group"] = "base"
 
+
 # Representation of private chat
 class RePrivateChat(ReChat):
     username: str
-    kind: Literal['private'] = "private"
+    kind: Literal["private"] = "private"
+
 
 # Representation of group chat
 class ReChatGroup(ReChat):
-    kind: Literal['group'] = "group"
+    kind: Literal["group"] = "group"
     active: bool = False
     chat_members: list[ReChatMember]
     type: Literal["group", "supergroup"]
 
+
 # Set up union
 ChatUnion = Union[RePrivateChat, ReChatGroup]
+
 
 # Representation of a session
 class ReChatSession(BaseModel):

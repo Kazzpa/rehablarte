@@ -16,20 +16,20 @@ class RedisRepository:
     async def delete(self, key: str):
         await self.redis.delete(key)
 
+
 class ReSessionRepository:
     def __init__(self, repo: RedisRepository):
         self.repo = repo
-    
+
     def _key(self, chat_id: int) -> str:
         return f"Session Chat id:{chat_id}"
-    
+
     async def save(self, session: ReChatSession):
         await self.repo.save(self._key(session.chat.id), session.__dict__)
 
     async def get(self, chat_id: int) -> ReChatSession | None:
         data = await self.repo.get(self._key(chat_id))
         return ReChat(**data) if data else None
-    
 
 
 class ReChatRepository:
