@@ -1,7 +1,7 @@
 import os
 from loguru import logger
 from aiogram import types, Router, F
-from aiogram.types import Message, TelegramObject
+from aiogram.types import Message
 from decorators import log_duration
 from modules.tts import PiperTTS
 from modules.stt import SpeechToText
