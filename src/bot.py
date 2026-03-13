@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 from handlers.member_commands import member_commands, setup_bot_commands
 from handlers.response_handler import response_handler
 from handlers.errors_handler import errors_router
+from handlers.event_handler import event_router
+from handlers.middlewares import InitializeSessionMiddleware
+from modules.redis_db import storage
 from handlers.conversation_handler import daily_config_router
 
 load_dotenv()  # Auto-loads .env
@@ -19,18 +22,26 @@ TOKEN = getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("BOT_TOKEN not found in .env file!")
 
-# Configure dispatcher and set up commands/middlewares
-dp = Dispatcher()
+# Bot defined globally (accessible to all handlers)
+bot = None
+
+# Configure dispatcher and set up commands/middlewares | We set the storage sesssion as well
+dp = Dispatcher(storage=storage)
 # Error hanlder must be before
 dp.include_router(errors_router)
+# routers
 dp.include_router(member_commands)
 dp.include_router(daily_config_router)
 dp.include_router(response_handler)
+dp.include_router(event_router)
+# middlewares
+dp.update.middleware(InitializeSessionMiddleware())
 dp.startup.register(setup_bot_commands)
 
 
 async def main() -> None:
     # Initialize Bot instance with default bot properties which will be passed to all API calls
+    global bot
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     logger.info("Starting bot!")
 

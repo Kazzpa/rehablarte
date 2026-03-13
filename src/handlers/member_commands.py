@@ -5,6 +5,8 @@ from aiogram.types import Message, BotCommand
 from aiogram.fsm.context import FSMContext
 from utils.redis_cache import cached_api_call 
 from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
+from utils.redis_cache import cached_api_call
+from decorators import log_duration
 from handlers.fsm_conversation_handler import RaeState
 from handlers.keyboards_handler import buildDiariaKeyboardMenu
 
@@ -128,6 +130,7 @@ async def command_get_word(message: Message, state: FSMContext) -> None:
     logger.info("Waiting for user's input...")
 
 
+@log_duration("RAE:Process_word")
 @member_commands.message(RaeState.searchWord)
 async def process_word(message: Message, state: FSMContext) -> None:
     """
@@ -139,7 +142,14 @@ async def process_word(message: Message, state: FSMContext) -> None:
     temp_msg = await message.answer("Espera le estoy preguntando a Reverte")
     word = message.text
     logger.info(f"Searching for word '{word}' in API")
-    rae_data = await get_rae_word(word)
+    cache_key = f"RAEWORD:{word.lower().strip()}"
+    rae_data = await cached_api_call(
+        cache_key=cache_key,
+        api_function=get_rae_word,
+        word=word,
+        ttl=3600,
+        # Cache for 1 hour
+    )
     if not rae_data:
         logger.error("Error calling rae api")
         raise Exception("Error calling rae api for word")

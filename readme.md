@@ -28,7 +28,7 @@ REDIS_PASSWORD={your-redis-password-here}
 
 It will install libraries form pyproject.toml
 ```shell
-python install -e .
+pip install -e .
 ```
 ### Download required models
 Running this script would download the voice model required for TTS
@@ -42,7 +42,7 @@ python bot.py
 ```
 ## Code formatter and linter
 In order to maintain clean code and format code
-``` 
+```shell
 ruff check
 ruff format
 ```

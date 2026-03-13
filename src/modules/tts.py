@@ -9,6 +9,7 @@ load_dotenv()
 
 
 class PiperTTS:
+    @log_duration("TTS: Init")
     def __init__(self, model_path=None):
         """Load Piper Spanish voice"""
         logger.info("Loading piperTTS")
