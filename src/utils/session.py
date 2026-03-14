@@ -80,7 +80,9 @@ async def initialize_session(state: FSMContext, chat: Chat):
     elif chat_type == "private":
         logger.info("Initializing session as private")
         if username is None:
-            raise RehablarteInternalException("Error username in a private chat cannot be None")
+            raise RehablarteInternalException(
+                "Error username in a private chat cannot be None"
+            )
         new_chat = RePrivateChat(
             id=chat_id, firstInteraction=datetime.now().date(), username=username
         )

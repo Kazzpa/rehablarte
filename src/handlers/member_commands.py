@@ -3,9 +3,8 @@ from aiogram import html, Router, Bot
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, BotCommand
 from aiogram.fsm.context import FSMContext
-from utils.redis_cache import cached_api_call 
-from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
 from utils.redis_cache import cached_api_call
+from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
 from decorators import log_duration
 from handlers.fsm_conversation_handler import RaeState
 from handlers.keyboards_handler import buildDiariaKeyboardMenu
@@ -34,7 +33,10 @@ async def setup_bot_commands(bot: Bot):
             description="Busca el significado de una palabra en la RAE",
         ),
         BotCommand(command="diaria", description="Comando para llamar "),
-        BotCommand(command="setdiaria", description="Permite configurar el comportamiento de la palabra diaria")
+        BotCommand(
+            command="setdiaria",
+            description="Permite configurar el comportamiento de la palabra diaria",
+        ),
     ]
     await bot.set_my_commands(commands)
 
@@ -73,6 +75,7 @@ async def command_help_handler(message: Message) -> None:
         """
     await message.answer(helpText)
 
+
 # TODO: Finish this command so instead of returning directly the word a config menu is called
 @member_commands.message(Command("diaria"))
 async def get_daily_word(message: Message) -> None:
@@ -88,16 +91,16 @@ async def get_daily_word(message: Message) -> None:
     palabro = rae_data.get("word")
     await message.answer(f"El palabro de hoy es: {palabro}")
 
+
 @member_commands.message(Command("setdiaria"))
 async def config_daily_word(message: Message, state: FSMContext) -> None:
-    """
-    """
+    """ """
     logger.info("Calling config of diaria word")
 
     # Get the keyboard, set state inside
     await buildDiariaKeyboardMenu(message, state)
 
-    # await message.answer("¿Que quieres configurar?") 
+    # await message.answer("¿Que quieres configurar?")
 
     # TODO: Set a constant to store the value of the word (avoiding multiple api calls)
 
@@ -116,6 +119,7 @@ async def command_random_handler(message: Message) -> None:
     rae_data = await get_rae_random()
     palabro = rae_data["word"]
     await message.answer(f"Toma palabro aleatorio: {palabro}")
+
 
 # TODO: Refator these functions so more logic is moved to the conversation handler
 @member_commands.message(Command("palabra"))

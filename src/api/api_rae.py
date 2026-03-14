@@ -24,14 +24,19 @@ async def get_rae_random() -> str:
 
         # If different response code log it and throw exception
         if response.status_code != 200:
-            raise RehablarteApiRaeException(f"Error in response, failed with status code: {response.status_code} in RAE API {url}", 
-                                            status_code=response.status_code, url_origin=url)
+            raise RehablarteApiRaeException(
+                f"Error in response, failed with status code: {response.status_code} in RAE API {url}",
+                status_code=response.status_code,
+                url_origin=url,
+            )
 
         logger.info("Response received with success!")
         # Parse the response,
         resultJson = response.json()
         if not resultJson or not resultJson.get("ok"):
-            raise RehablarteApiRaeException(f"Response received is empty or null: {resultJson}")
+            raise RehablarteApiRaeException(
+                f"Response received is empty or null: {resultJson}"
+            )
 
         return resultJson.get("data")
     except Exception as e:
@@ -65,18 +70,25 @@ async def get_rae_word(word: str) -> Palabra:
                     )
                     # in this case avoid exception and re
                     return "NOT_FOUND"
-            raise RehablarteApiRaeException(f"Error in response, failed with status code: {response.status_code} in RAE API {url}", 
-                                            status_code=response.status_code, url_origin=url)
-        
+            raise RehablarteApiRaeException(
+                f"Error in response, failed with status code: {response.status_code} in RAE API {url}",
+                status_code=response.status_code,
+                url_origin=url,
+            )
+
         # process response
         logger.info("Responce received with success!")
         resultJson = response.json()
         if not resultJson or not resultJson.get("ok"):
-            raise RehablarteApiRaeException(f"Response received is empty or null: {resultJson}")
+            raise RehablarteApiRaeException(
+                f"Response received is empty or null: {resultJson}"
+            )
         # Mapping the json
         resultData = resultJson.get("data")
         if resultData is None:
-            raise RehablarteApiRaeException("Error reading data from json - cannot map subjson from api rae")
+            raise RehablarteApiRaeException(
+                "Error reading data from json - cannot map subjson from api rae"
+            )
         # Now map the object
         return mapJsonToPalabra(
             resultData.get("meanings"),
@@ -84,7 +96,9 @@ async def get_rae_word(word: str) -> Palabra:
             resultData.get("suggestions"),
         )
     except Exception as e:
-        raise RehablarteApiRaeException("Exception! - API RAE", status_code=response.status_code, url_origin=url) from e
+        raise RehablarteApiRaeException(
+            "Exception! - API RAE", status_code=response.status_code, url_origin=url
+        ) from e
 
 
 async def get_rae_daily() -> Palabra:
@@ -104,15 +118,22 @@ async def get_rae_daily() -> Palabra:
 
         # If different response code log it and throw exception
         if response.status_code != 200:
-            raise RehablarteApiRaeException(f"Error in response, failed with status code: {response.status_code} in RAE API {url}", 
-                                            status_code=response.status_code, url_origin=url)
+            raise RehablarteApiRaeException(
+                f"Error in response, failed with status code: {response.status_code} in RAE API {url}",
+                status_code=response.status_code,
+                url_origin=url,
+            )
 
         logger.info("Response received with success!")
         # Parse the response
         resultJson = response.json()
         if not resultJson or not resultJson.get("ok"):
-            raise RehablarteApiRaeException(f"Response received is empty or null: {resultJson}")
+            raise RehablarteApiRaeException(
+                f"Response received is empty or null: {resultJson}"
+            )
 
         return resultJson.get("data")
     except Exception as e:
-        raise RehablarteApiRaeException("Exception! - API RAE", status_code=response.status_code, url_origin=url) from e
+        raise RehablarteApiRaeException(
+            "Exception! - API RAE", status_code=response.status_code, url_origin=url
+        ) from e
