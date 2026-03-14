@@ -2,6 +2,7 @@ from functools import wraps
 from loguru import logger
 import time
 import inspect
+from errors.errors import RehablarteInternalException
 
 
 def log_duration(func_name=None):
@@ -23,7 +24,7 @@ def log_duration(func_name=None):
             except Exception as e:
                 duration = time.perf_counter() - start_time
                 logger.error(f"{display_name}: {duration:.2f}s ❌ {str(e)}")
-                raise
+                raise RehablarteInternalException("Decorator error in wrapper") from e
 
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
@@ -37,7 +38,7 @@ def log_duration(func_name=None):
             except Exception as e:
                 duration = time.perf_counter() - start_time
                 logger.error(f"{display_name}: {duration:.2f}s ❌ {str(e)}")
-                raise
+                raise RehablarteInternalException("Decorator error in sync wrapper") from e
 
         # Return correct wrapper
         return wrapper if inspect.iscoroutinefunction(func) else sync_wrapper

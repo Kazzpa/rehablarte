@@ -3,6 +3,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from handlers.fsm_conversation_handler import DailyMenuFlow
+from errors.errors import MenukeyboardException
 
 
 async def buildDiariaKeyboardMenu(message: Message, state: FSMContext) -> None:
@@ -37,9 +38,7 @@ async def buildDiariaKeyboardMenu(message: Message, state: FSMContext) -> None:
 
         await message.answer("¿Que opcion quieres configurar?", reply_markup=keyboard)
     except Exception as e:
-        # TODO: Replace with custom exception for menus
-        logger.exception("Exception!")
-        raise e
+        raise MenukeyboardException("Error building keyboard menu", menu_name="diariaKeyboardMenu") from e
     
 async def buildDiariaRepeatKeyboardMenu(message: Message, state: FSMContext) -> None:
     """
@@ -50,9 +49,7 @@ async def buildDiariaRepeatKeyboardMenu(message: Message, state: FSMContext) -> 
 
         await message.answer("¿Quieres que la palabra diaria se repita a lo largo del día?", reply_markup=keyboard)
     except Exception as e:
-        # TODO: Replace with custom exception for menus
-        logger.exception("Exception!")
-        raise e
+        raise MenukeyboardException("Error building keyboard menu", menu_name="diariaRepeatKeyboardMenu") from e
     
 async def buildNumberOfRepeatsKeyboardMenu() -> InlineKeyboardMarkup:
     try:
@@ -72,9 +69,7 @@ async def buildNumberOfRepeatsKeyboardMenu() -> InlineKeyboardMarkup:
         )
         return keyboard
     except Exception as e:
-        # TODO: Replace with custom exception for menus
-        logger.exception("Exception!")
-        raise e
+        raise MenukeyboardException("Error building keyboard menu",menu_name="NumberOfRepetsKeybardMenu") from e
 
 # Generic function to generate a yes/no keyboard
 async def buildGenericResponseKeyboard() -> InlineKeyboardMarkup:

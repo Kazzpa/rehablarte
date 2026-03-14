@@ -1,6 +1,7 @@
 from loguru import logger
 from aiogram.fsm.context import FSMContext
 from aiogram.types.chat import Chat
+from errors.errors import RehablarteInternalException
 from models.chat_entity import (
     ReChatSession,
     ReChat,
@@ -18,9 +19,7 @@ async def check_session_persistance(state: FSMContext):
     logger.info("Checking chat persistance")
     session = await get_session(state)
     if session is None:
-        logger.error("Error - Session is not initialized")
-        # TODO: Maybe create custom exception
-        raise Exception("Session not valid")
+        raise RehablarteInternalException("Error - Session is not initialized")
 
     if not session.is_dirty:
         logger.info("Session is not diry - skipping persistance")
@@ -81,8 +80,7 @@ async def initialize_session(state: FSMContext, chat: Chat):
     elif chat_type == "private":
         logger.info("Initializing session as private")
         if username is None:
-            logger.error("Error username in a private chat cannot be None")
-            raise Exception("Error username is None")
+            raise RehablarteInternalException("Error username in a private chat cannot be None")
         new_chat = RePrivateChat(
             id=chat_id, firstInteraction=datetime.now().date(), username=username
         )

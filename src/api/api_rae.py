@@ -7,6 +7,7 @@ from api.config import (
     rae_api_url_daily,
 )
 from models.palabra_entity import mapJsonToPalabra, Palabra
+from errors.errors import RehablarteApiRaeException
 
 
 async def get_rae_random() -> str:
@@ -23,17 +24,14 @@ async def get_rae_random() -> str:
 
         # If different response code log it and throw exception
         if response.status_code != 200:
-            logger.error(
-                f"Error in response, failed with status code: {response.status_code} in RAE API {url}"
-            )
-            raise Exception(f"Request failed with status code: {response.status_code}")
+            raise RehablarteApiRaeException(f"Error in response, failed with status code: {response.status_code} in RAE API {url}", 
+                                            status_code=response.status_code, url_origin=url)
 
         logger.info("Response received with success!")
         # Parse the response,
         resultJson = response.json()
         if not resultJson or not resultJson.get("ok"):
-            logger.error("Response returned empty string or null value")
-            raise Exception(f"Response received: {resultJson} not valid")
+            raise RehablarteApiRaeException(f"Response received is empty or null: {resultJson}")
 
         return resultJson.get("data")
     except Exception as e:
@@ -67,22 +65,18 @@ async def get_rae_word(word: str) -> Palabra:
                     )
                     # in this case avoid exception and re
                     return "NOT_FOUND"
-            logger.error(
-                f"Error in response, failed with status code: {response.status_code} in RAE API {url}"
-            )
-            raise Exception(f"Request failed with status code: {response.status_code}")
-
+            raise RehablarteApiRaeException(f"Error in response, failed with status code: {response.status_code} in RAE API {url}", 
+                                            status_code=response.status_code, url_origin=url)
+        
         # process response
         logger.info("Responce received with success!")
         resultJson = response.json()
         if not resultJson or not resultJson.get("ok"):
-            logger.error("Response returned empty string or null value")
-            raise Exception(f"Response received: {resultJson} not valid")
+            raise RehablarteApiRaeException(f"Response received is empty or null: {resultJson}")
         # Mapping the json
         resultData = resultJson.get("data")
         if resultData is None:
-            logger.error("Error gettin data json")
-            raise Exception("Error mapping subjson from api rae")
+            raise RehablarteApiRaeException("Error reading data from json - cannot map subjson from api rae")
         # Now map the object
         return mapJsonToPalabra(
             resultData.get("meanings"),
@@ -90,8 +84,7 @@ async def get_rae_word(word: str) -> Palabra:
             resultData.get("suggestions"),
         )
     except Exception as e:
-        logger.exception("Exception! - API RAE: ", extra={"url": url})
-        raise e
+        raise RehablarteApiRaeException("Exception! - API RAE", status_code=response.status_code, url_origin=url) from e
 
 
 async def get_rae_daily() -> Palabra:
@@ -111,19 +104,15 @@ async def get_rae_daily() -> Palabra:
 
         # If different response code log it and throw exception
         if response.status_code != 200:
-            logger.error(
-                f"Error in response, failed with status code: {response.status_code} in RAE API {url}"
-            )
-            raise Exception(f"Request failed with status code: {response.status_code}")
+            raise RehablarteApiRaeException(f"Error in response, failed with status code: {response.status_code} in RAE API {url}", 
+                                            status_code=response.status_code, url_origin=url)
 
         logger.info("Response received with success!")
         # Parse the response
         resultJson = response.json()
         if not resultJson or not resultJson.get("ok"):
-            logger.error("Response returned empty string or null value")
-            raise Exception(f"Response received: {resultJson} not valid")
+            raise RehablarteApiRaeException(f"Response received is empty or null: {resultJson}")
 
         return resultJson.get("data")
     except Exception as e:
-        logger.exception("Exception! - API RAE: ", extra={"url", url})
-        raise e
+        raise RehablarteApiRaeException("Exception! - API RAE", status_code=response.status_code, url_origin=url) from e
