@@ -47,29 +47,28 @@ async def get_member_from_chat(
     )
 
 
-async def get_session(state: FSMContext) -> ReChatSession:
+async def get_session(chat_id: int) -> ReChatSession:
     logger.info("Getting session")
-    data = await state.get_data()
-    rawSession = data.get("chat_session")
-    if rawSession is None:
+    redis_repo = RedisRepository(redis_client)
+    session_repo = ReSessionRepository(redis_repo)
+    data = await session_repo.get(chat_id=chat_id)
+    if data is None:
         logger.info("No session detected, creating session...")
         return ReChatSession()
 
-    return ReChatSession.model_validate_json(rawSession)
+    return ReChatSession.model_validate_json(data)
 
 
-async def update_session(state: FSMContext, session: ReChatSession):
+async def update_session(session: ReChatSession):
     logger.info("Updating session...")
-    await state.update_data(chat_session=session.model_dump_json())
+    redis_repo = RedisRepository(redis_client)
+    session_repo = ReSessionRepository(redis_repo)
+    await session_repo.save(session=session)
 
+# Factory method to create sessions
+async def initialize_new_session(chat: Chat) -> ReChatSession:
+    logger.info("Initializing new session")
 
-async def initialize_session(state: FSMContext, chat: Chat):
-    logger.info("Initializing session")
-    data = await state.get_data()
-    rawSession = data.get("chat_session")
-    if rawSession is not None:
-        logger.info("Session alredy initialized, cancelling...")
-        return
     chat_id = chat.id
     chat_type = chat.type
     username = chat.username
@@ -94,5 +93,4 @@ async def initialize_session(state: FSMContext, chat: Chat):
             chat_members=[],
             type=chat_type,
         )
-    new_session = ReChatSession(initialized=True, chat=new_chat)
-    await update_session(state=state, session=new_session)
+    return ReChatSession(initialized=True, chat=new_chat)

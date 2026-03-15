@@ -1,85 +1,62 @@
 from loguru import logger
+from pydantic import BaseModel
+
+from errors.errors import ReHablarteMappingException
 
 
-class Origin:
-    def __init__(
-        self,
-        raw: str,
-        type: str,
-        voice: str,
-        text: str,
-    ):
-        """
-        Docstring for __init__
+class Origin(BaseModel):
+    """
+    Docstring for Origin
 
-        :param self: self
-        :param raw: Procedencia de la palabra
-        :param type: tipo
-        :param voice: voice
-        :param text: text
-        """
-        self.raw = raw
-        self.type = type
-        self.voice = voice
-        self.text = text
+    :param self: self
+    :param raw: Procedencia de la palabra
+    :param type: tipo
+    :param voice: voice
+    :param text: text
+    """
+    raw: str
+    type: str
+    voice: str
+    text: str
 
+class Sense(BaseModel):
+    """
+    Docstring for __init__
 
-class Sense:
-    def __init__(
-        self,
-        raw: str,
-        category: str,
-        usage: str,
-        description: str,
-        synonyms: str,
-        antonyms: str,
-    ):
-        """
-        Docstring for __init__
-
-        :param self: Description
-        :param raw: Contenido la palabra en la rae
-        :param category: Verb, noun, etc
-        :param usage: uso
-        :param description: Unica descripcion
-        :param synonyms: Lista de sinonimos
-        :param antonyms: Lista de antonimos
-        """
-        self.raw = raw
-        self.category = category
-        self.usage = usage
-        self.description = description
-        self.synonyms = synonyms
-        self.antonyms = antonyms
-
+    :param self: Description
+    :param raw: Contenido la palabra en la rae
+    :param category: Verb, noun, etc
+    :param usage: uso
+    :param description: Unica descripcion
+    :param synonyns: Lista de sinonimos
+    :param antonyns: Lista de antonimos
+    """
+    raw: str
+    category: str
+    usage: str | None
+    description: str
+    synonyms: list[str] | None
+    antonyms: list[str] | None
 
 # Clase modelando el objeto padre
-class Palabra:
-    def __init__(
-        self,
-        word: str,
-        sensesList: list[Sense],
-        origin: Origin = None,
-        suggestions: str = None,
-    ):
-        """
-        Docstring for __init__
+class Palabra(BaseModel):
+    """
+    Docstring for palabra
 
-        :param self: self
-        :param word: palabra de busqueda
-        :type word: str
-        :param sensesList: lista con los objectos con las definiciones
-        :type sensesList: list[Sense]
-        :param origin: Objecto origen con la informacion de origen
-        :type origin: Origin
-        :param suggestions: Unkown
-        :type suggestions: str
-        """
-        self.word = word
-        self.origin = origin
-        self.sensesList = sensesList
-        self.suggestions = suggestions
-
+    :param self: self
+    :param word: palabra de busqueda
+    :type word: str
+    :param sensesList: lista con los objectos con las definiciones
+    :type sensesList: list[Sense]
+    :param origin: Objecto origen con la informacion de origen
+    :type origin: Origin
+    :param suggestions: Unkown
+    :type suggestions: str
+    """
+    word: str
+    sensesList: list[Sense] | None
+    origin: Origin | None= None
+    suggestions: str | None = None
 
 # For the mapper we expect a json with a defined structure as we will parse the values manually
 def mapJsonToPalabra(meanings, word, suggestionsStr=None) -> Palabra:
@@ -122,8 +99,7 @@ def mapJsonToPalabra(meanings, word, suggestionsStr=None) -> Palabra:
             suggestions=suggestionsStr,
         )
     except KeyError as e:
-        logger.exception("Exception in mapper...")
-        raise Exception("Exception in palabra mapper") from e
+        raise ReHablarteMappingException("Exception in palabra mapper") from e
 
 
 def mapJsonToOrigin(json) -> Origin | None:
@@ -149,8 +125,7 @@ def mapJsonToOrigin(json) -> Origin | None:
             text=json.get("text"),
         )
     except KeyError as e:
-        logger.exception("Exception in mapper...")
-        raise Exception("Exception in origin mapper") from e
+        raise ReHablarteMappingException("Exception in origin mapper") from e
 
 
 def mapJsonToSense(json) -> Sense | None:
@@ -178,5 +153,4 @@ def mapJsonToSense(json) -> Sense | None:
             antonyms=json.get("antonyms"),
         )
     except KeyError as e:
-        logger.exception("Exception in mapper...")
-        raise Exception("Exception in sense mapper") from e
+        raise ReHablarteMappingException("Exception in sense mapper") from e

@@ -22,14 +22,14 @@ class ReSessionRepository:
         self.repo = repo
 
     def _key(self, chat_id: int) -> str:
-        return f"Session Chat id:{chat_id}"
+        return f"session_chat_id:{chat_id}"
 
     async def save(self, session: ReChatSession):
-        await self.repo.save(self._key(session.chat.id), session.__dict__)
+        await self.repo.save(self._key(session.chat.id), session.model_dump(mode="json"))
 
     async def get(self, chat_id: int) -> ReChatSession | None:
         data = await self.repo.get(self._key(chat_id))
-        return ReChat(**data) if data else None
+        return ReChatSession.model_validate(data) if data else None
 
 
 class ReChatRepository:
@@ -37,11 +37,11 @@ class ReChatRepository:
         self.repo = repo
 
     def _key(self, chat_id: int) -> str:
-        return f"Chat:{chat_id}"
+        return f"Chat_id:{chat_id}"
 
     async def save(self, chat: ReChat):
-        await self.repo.save(self._key(chat.id), chat.__dict__)
+        await self.repo.save(self._key(chat.id), chat.model_dump(mode="json"))
 
     async def get(self, chat_id: int) -> ReChat | None:
         data = await self.repo.get(self._key(chat_id))
-        return ReChat(**data) if data else None
+        return ReChat.model_validate(data) if data else None

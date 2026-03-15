@@ -1,3 +1,4 @@
+import json
 from loguru import logger
 from aiogram import html, Router, Bot
 from aiogram.filters import CommandStart, Command
@@ -5,6 +6,7 @@ from aiogram.types import Message, BotCommand
 from aiogram.fsm.context import FSMContext
 from utils.redis_cache import cached_api_call
 from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
+from models.palabra_entity import Palabra
 from decorators import log_duration
 from handlers.fsm_conversation_handler import RaeState
 from handlers.keyboards_handler import buildDiariaKeyboardMenu
@@ -147,12 +149,21 @@ async def process_word(message: Message, state: FSMContext) -> None:
     word = message.text
     logger.info(f"Searching for word '{word}' in API")
     cache_key = f"RAEWORD:{word.lower().strip()}"
+    result = await get_rae_word(word=word)
+    print(type(result))
+    print(result)
+
+    serialized = json.dumps(result.model_dump(mode="json"))
+    print(serialized)
+
+    deserialized = Palabra.model_validate(json.loads(serialized))
+    print(deserialized)
     rae_data = await cached_api_call(
         cache_key=cache_key,
         api_function=get_rae_word,
         word=word,
-        ttl=3600,
-        # Cache for 1 hour
+        ttl=3600, # Cache for 1 hour
+        result_type=Palabra
     )
     if not rae_data:
         logger.error("Error calling rae api")
