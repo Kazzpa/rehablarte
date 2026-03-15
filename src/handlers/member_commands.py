@@ -11,7 +11,7 @@ from models.palabra_entity import Palabra, PalabraSimple
 from models.chat_entity import ReChatSession
 from decorators import log_duration
 from handlers.fsm_conversation_handler import RaeState
-from handlers.keyboards_handler import buildDiariaKeyboardMenu
+from handlers.keyboards_handler import startDiariaBuildMenu
 from utils.common import cache_keys_prefix, seconds_until_midnight
 
 
@@ -117,18 +117,13 @@ async def get_daily_word(message: Message, session: ReChatSession) -> None:
 
 
 @member_commands.message(Command("setdiaria"))
-async def config_daily_word(message: Message, state: FSMContext) -> None:
+async def config_daily_word(message: Message, state: FSMContext, session: ReChatSession) -> None:
     """ """
     logger.info("Calling config of diaria word")
 
     # Get the keyboard, set state inside
-    await buildDiariaKeyboardMenu(message, state)
+    await startDiariaBuildMenu(message, state, session=session)
 
-    # await message.answer("¿Que quieres configurar?")
-
-    # TODO: Set a constant to store the value of the word (avoiding multiple api calls)
-
-    # Set a FSM with menu
 
 
 @member_commands.message(Command("aleatoria"))

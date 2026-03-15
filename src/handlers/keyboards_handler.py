@@ -4,54 +4,64 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from handlers.fsm_conversation_handler import DailyMenuFlow
 from errors.errors import MenukeyboardException
+from models.chat_entity import ReChatDiariaConfig, ReChatSession
 
 
-async def buildDiariaKeyboardMenu(message: Message, state: FSMContext) -> None:
+async def startDiariaBuildMenu(message: Message, state: FSMContext, session: ReChatSession) -> None:
     """ """
     try:
-        logger.info("Building diaria word keyboard")
-        # The array defines the lineup of the buttons per each row: 2-2-1 in this case
-        keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="Activar palabra diaria", callback_data="activate"
-                    ),
-                    InlineKeyboardButton(
-                        text="Desactivar palabra diaria", callback_data="deactivate"
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="Hora del mensaje", callback_data="timeconfig"
-                    ),
-                    InlineKeyboardButton(
-                        text="Repeticion del mensaje", callback_data="repetitionconfig"
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="Significado de la palabra", callback_data="senses"
-                    ),
-                    InlineKeyboardButton(
-                        text="Origen de la palabra", callback_data="origin"
-                    ),
-                ],
-                [
-                    InlineKeyboardButton(text="✅​ Finalizar", callback_data="confirm"),
-                    InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel"),
-                ],
-            ]
-        )
+        logger.info("Starting diaria setting menu process")
+        keyboard = await buildDiariaKeyboardMenu()
 
+        # Create a temporary config object to replace later
+        config = session.chat.diariaConfig
+        await state.update_data(config_data=config.model_dump_json())
         # set first state
         await state.set_state(DailyMenuFlow.config_choosing)
 
-        await message.answer("¿Que opcion quieres configurar?", reply_markup=keyboard)
+        await message.answer(build_menu_text(config), reply_markup=keyboard)
     except Exception as e:
         raise MenukeyboardException(
             "Error building keyboard menu", menu_name="diariaKeyboardMenu"
         ) from e
+
+async def buildDiariaKeyboardMenu() -> InlineKeyboardMarkup:
+    """ """
+    logger.info("Building diaria word keyboard")
+    # The array defines the lineup of the buttons per each row: 2-2-1 in this case
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="Activar palabra diaria", callback_data="activate"
+                ),
+                InlineKeyboardButton(
+                    text="Desactivar palabra diaria", callback_data="deactivate"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Hora del mensaje", callback_data="timeconfig"
+                ),
+                InlineKeyboardButton(
+                    text="Repeticion del mensaje", callback_data="repetitionconfig"
+                ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Significado de la palabra", callback_data="senses"
+                ),
+                InlineKeyboardButton(
+                    text="Origen de la palabra", callback_data="origin"
+                ),
+            ],
+            [
+                InlineKeyboardButton(text="✅​ Finalizar", callback_data="confirm"),
+                InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel"),
+            ],
+        ]
+    )
+    return keyboard
 
 
 async def buildDiariaRepeatKeyboardMenu(message: Message) -> None:
@@ -90,6 +100,23 @@ async def buildNumberOfRepeatsKeyboardMenu() -> InlineKeyboardMarkup:
             "Error building keyboard menu", menu_name="NumberOfRepetsKeybardMenu"
         ) from e
 
+# TODO: FINISH the cliock
+async def buildClockSelectionKeyboard() -> InlineKeyboardMarkup:
+    rows = []
+    hours = [f"{h:02d}:00" for h in range(24)]
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                rows
+            ],
+            [
+                InlineKeyboardButton(text="✅​ Finalizar", callback_data="confirm"),
+                InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")
+            ]
+        ]
+    )
+    return keyboard
 
 # Generic function to generate a yes/no keyboard
 async def buildGenericResponseKeyboard() -> InlineKeyboardMarkup:
@@ -103,3 +130,12 @@ async def buildGenericResponseKeyboard() -> InlineKeyboardMarkup:
         ]
     )
     return keyboard
+
+def build_menu_text(config: ReChatDiariaConfig) -> str:
+    lines = ["¿Que opcion quieres configurar?\n"]
+    lines.append(f"{'✅' if config.isActive else '❌'} Palabra diaria activa")
+    lines.append(f"🕐 Hora: {config.scheduleTime.strftime('%H:%M') if config.scheduleTime else 'No configurada'}")
+    lines.append(f"🔁 Repeticion: {config.repetition if config.repetition else 'Sin repeticion'}")
+    lines.append(f"{'✅' if config.senses else '❌'} Mostrar significado")
+    lines.append(f"{'✅' if config.origin else '❌'} Mostrar origen")
+    return "\n".join(lines)
