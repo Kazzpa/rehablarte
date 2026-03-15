@@ -4,12 +4,15 @@ from aiogram import html, Router, Bot
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, BotCommand
 from aiogram.fsm.context import FSMContext
+from errors.errors import ReHablarteMappingException, RehablarteApiRaeException
 from utils.redis_cache import cached_api_call
-from api.api_rae import get_rae_random, get_rae_word, get_rae_daily
-from models.palabra_entity import Palabra
+from api.api_rae import get_rae_random, get_rae_word
+from models.palabra_entity import Palabra, PalabraSimple
+from models.chat_entity import ReChatSession
 from decorators import log_duration
 from handlers.fsm_conversation_handler import RaeState
 from handlers.keyboards_handler import buildDiariaKeyboardMenu
+from utils.common import cache_keys_prefix, seconds_until_midnight
 
 
 # this function set ups the help text in commands
@@ -78,9 +81,8 @@ async def command_help_handler(message: Message) -> None:
     await message.answer(helpText)
 
 
-# TODO: Finish this command so instead of returning directly the word a config menu is called
 @member_commands.message(Command("diaria"))
-async def get_daily_word(message: Message) -> None:
+async def get_daily_word(message: Message, session: ReChatSession) -> None:
     """
     Docstring for get_daily_word
     command to get the daily word
@@ -89,8 +91,28 @@ async def get_daily_word(message: Message) -> None:
     :type message: Message
     """
     logger.info("Calling diaria command")
-    rae_data = await get_rae_daily()
-    palabro = rae_data.get("word")
+
+    res_type = PalabraSimple
+    function_cb = get_rae_random
+    # Comprobar configuracion
+    if session.chat.diariaConfig.senses | session.chat.diariaConfig.origin:
+        res_type = Palabra
+        function_cb = get_rae_word
+
+    # comprobar si la palabra diaria se ha guardado ya
+    cache_key = cache_keys_prefix.rae_random_key
+
+    rae_data = await cached_api_call(
+        cache_key=cache_key,
+        api_function=function_cb,
+        ttl=seconds_until_midnight(), # Cache for until midnight
+        result_type=res_type
+    )
+
+    if not isinstance(rae_data, PalabraSimple):
+        raise ReHablarteMappingException("Error mapping the type of the object after api call")
+
+    palabro = rae_data.word
     await message.answer(f"El palabro de hoy es: {palabro}")
 
 
@@ -148,16 +170,8 @@ async def process_word(message: Message, state: FSMContext) -> None:
     temp_msg = await message.answer("Espera le estoy preguntando a Reverte")
     word = message.text
     logger.info(f"Searching for word '{word}' in API")
-    cache_key = f"RAEWORD:{word.lower().strip()}"
-    result = await get_rae_word(word=word)
-    print(type(result))
-    print(result)
+    cache_key = cache_keys_prefix.rae_word_key + " " +  word.lower().strip()
 
-    serialized = json.dumps(result.model_dump(mode="json"))
-    print(serialized)
-
-    deserialized = Palabra.model_validate(json.loads(serialized))
-    print(deserialized)
     rae_data = await cached_api_call(
         cache_key=cache_key,
         api_function=get_rae_word,
@@ -166,8 +180,11 @@ async def process_word(message: Message, state: FSMContext) -> None:
         result_type=Palabra
     )
     if not rae_data:
-        logger.error("Error calling rae api")
-        raise Exception("Error calling rae api for word")
+        raise RehablarteApiRaeException("Error calling rae api for word")
+
+    if not isinstance(rae_data, Palabra):
+        raise ReHablarteMappingException("Error mapping response type")
+    
     # TODO: Move this to a constant
     if rae_data == "NOT_FOUND":
         logger.warning("Word not found in rae api")

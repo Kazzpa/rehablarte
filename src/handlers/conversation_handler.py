@@ -1,13 +1,20 @@
 from loguru import logger
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
+from errors.errors import ReHablarteMappingException, RehablarteApiRaeException
 from handlers.fsm_conversation_handler import DailyMenuFlow
 from handlers.keyboards_handler import (
     buildGenericResponseKeyboard,
     buildDiariaKeyboardMenu,
     buildNumberOfRepeatsKeyboardMenu,
 )
+from api.api_rae import get_rae_random
+from models.chat_entity import ReChatSession
+from utils.common import cache_keys_prefix
+from models.palabra_entity import Palabra, PalabraSimple
+from utils.common import seconds_until_midnight
+from utils.redis_cache import cached_api_call
 
 
 # Callback function definitions
@@ -17,14 +24,33 @@ daily_config_router = Router()
 
 
 @daily_config_router.callback_query(DailyMenuFlow.config_choosing, F.data == "activate")
-async def activate_daily(callback: CallbackQuery, state: FSMContext):
+async def activate_daily(callback: CallbackQuery, state: FSMContext, session: ReChatSession):
+    """
+    Search the random word if not saved already and set state to active
+    """
     logger.info("activating daily word")
     await callback.answer("Activar")
     await callback.message.edit_text("La palabra diaria esta activada")
 
     # comprobar si la palabra diaria se ha guardado ya
+    cache_key = cache_keys_prefix.rae_random_key
 
-    # Cambiar el estado guardado
+    rae_data = await cached_api_call(
+        cache_key=cache_key,
+        api_function=get_rae_random,
+        ttl=seconds_until_midnight(), # Cache for until midnight
+        result_type=PalabraSimple
+    )
+
+    if not rae_data:
+        raise RehablarteApiRaeException("Error calling rae api for word")
+
+    if not isinstance(rae_data, PalabraSimple):
+        raise ReHablarteMappingException("Error mapping response type")
+    
+    # Cambiar el estado guardado a activado
+    session.chat.diariaConfig.isActive = True
+    session.is_dirty = True
 
     await state.clear()
 
@@ -32,12 +58,14 @@ async def activate_daily(callback: CallbackQuery, state: FSMContext):
 @daily_config_router.callback_query(
     DailyMenuFlow.config_choosing, F.data == "deactivate"
 )
-async def deactivate_daily(callback: CallbackQuery, state: FSMContext):
+async def deactivate_daily(callback: CallbackQuery, state: FSMContext, session: ReChatSession):
     logger.info("deactivating daily word")
     await callback.answer("Desactivando")
-    await callback.message.edit_text("La pabra diaria esta desactivada")
 
-    # Cambiar el estado guardado
+    session.chat.diariaConfig.isActive = False
+    session.is_dirty = True
+
+    await callback.message.edit_text("La pabra diaria esta desactivada")
 
     await state.clear()
 

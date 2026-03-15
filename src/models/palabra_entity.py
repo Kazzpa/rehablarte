@@ -8,7 +8,6 @@ class Origin(BaseModel):
     """
     Docstring for Origin
 
-    :param self: self
     :param raw: Procedencia de la palabra
     :param type: tipo
     :param voice: voice
@@ -23,7 +22,6 @@ class Sense(BaseModel):
     """
     Docstring for __init__
 
-    :param self: Description
     :param raw: Contenido la palabra en la rae
     :param category: Verb, noun, etc
     :param usage: uso
@@ -38,12 +36,20 @@ class Sense(BaseModel):
     synonyms: list[str] | None
     antonyms: list[str] | None
 
+class PalabraSimple(BaseModel):
+    """
+    Docstring for palabraSimple
+    this is used when the rae api returns limited response objects
+
+    :param word: palabra buscada
+    """
+    word: str
+
 # Clase modelando el objeto padre
 class Palabra(BaseModel):
     """
     Docstring for palabra
 
-    :param self: self
     :param word: palabra de busqueda
     :type word: str
     :param sensesList: lista con los objectos con las definiciones
@@ -62,6 +68,7 @@ class Palabra(BaseModel):
 def mapJsonToPalabra(meanings, word, suggestionsStr=None) -> Palabra:
     """
     Function to manually map json response from RAE API into an object
+
     :param json: data["meanings"] json in string
     :type json: str
     :param suggestions: suggestions value from data passed directly for easy access
@@ -106,6 +113,7 @@ def mapJsonToOrigin(json) -> Origin | None:
     """
     Function to manually map json data to Object
     can return None if the json provided is null
+
     :param json: ["meanings"][0]["origin"]
     :type json: str
     :return: object
@@ -133,6 +141,7 @@ def mapJsonToSense(json) -> Sense | None:
         """
         Function to manually map json data to Object
         can return None if the json provided is null
+        
         :param json: ["meanings"][0]["senses"]
         :type json: str
         :return: Sense Object

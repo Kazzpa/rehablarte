@@ -54,7 +54,7 @@ async def buildDiariaKeyboardMenu(message: Message, state: FSMContext) -> None:
         ) from e
 
 
-async def buildDiariaRepeatKeyboardMenu(message: Message, state: FSMContext) -> None:
+async def buildDiariaRepeatKeyboardMenu(message: Message) -> None:
     """ """
     try:
         logger.info("Building repeat diaria word keyboard")

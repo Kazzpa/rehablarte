@@ -6,6 +6,7 @@ from decorators import log_duration
 from modules.tts import PiperTTS
 from modules.stt import SpeechToText
 from utils.redis_cache import cached_api_call
+from utils.common import cache_keys_prefix
 
 # Router capturing all commands
 response_handler = Router()
@@ -34,7 +35,7 @@ async def echo_handler(message: Message) -> None:
         return
     status_msg = await message.answer("⏳ Generando audio...")
 
-    cache_key = f"TTS:{text.lower().strip()}"
+    cache_key = cache_keys_prefix.rae_tts_key + text.lower().strip()
 
     audio_bytes = await cached_api_call(
         cache_key=cache_key,
