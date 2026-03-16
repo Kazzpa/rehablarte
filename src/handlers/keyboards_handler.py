@@ -100,22 +100,27 @@ async def buildNumberOfRepeatsKeyboardMenu() -> InlineKeyboardMarkup:
             "Error building keyboard menu", menu_name="NumberOfRepetsKeybardMenu"
         ) from e
 
-# TODO: FINISH the cliock
+# Builds the keyboard menu for selecting a time in for the daily word
 async def buildClockSelectionKeyboard() -> InlineKeyboardMarkup:
     rows = []
     hours = [f"{h:02d}:00" for h in range(24)]
-
+    
+    hoursPerBtn = 4 # Increment
+    for i in range(0, len(hours), hoursPerBtn):
+        row = []
+        for hour in hours[i:i+hoursPerBtn]:
+            col = InlineKeyboardButton(text=hour, callback_data=f"time:{hour}")
+            row.append(col)
+        rows.append(row)
+    
+    # append buttons in last row
+    rows.append([InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")])
+    
+    # build keyboard
     keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                rows
-            ],
-            [
-                InlineKeyboardButton(text="✅​ Finalizar", callback_data="confirm"),
-                InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")
-            ]
-        ]
+        inline_keyboard=rows
     )
+    
     return keyboard
 
 # Generic function to generate a yes/no keyboard

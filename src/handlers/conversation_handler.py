@@ -2,9 +2,11 @@ from loguru import logger
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
+from datetime import time
 from errors.errors import MenukeyboardException, ReHablarteMappingException, RehablarteApiRaeException
 from handlers.fsm_conversation_handler import DailyMenuFlow
 from handlers.keyboards_handler import (
+    buildClockSelectionKeyboard,
     buildDiariaKeyboardMenu,
     buildNumberOfRepeatsKeyboardMenu,
     build_menu_text
@@ -96,9 +98,45 @@ async def deactivate_daily(callback: CallbackQuery, state: FSMContext):
 async def time_config_selected(callback: CallbackQuery, state: FSMContext):
     logger.info("time configuration selected")
     # TODO: Finish this
-    
+    kb = await buildClockSelectionKeyboard()
     # Build clock menu
+    # message
+    await callback.message.edit_text(
+        "¿A que hora quieres que se envie la palabra diaria?",
+        reply_markup=kb,
+    )
 
+    # change FSM state
+    await state.set_state(DailyMenuFlow.confirming)
+
+
+@daily_config_router.callback_query(
+    DailyMenuFlow.confirming, F.data.startswith("time:")
+)
+async def time_config_confirm(callback: CallbackQuery, state: FSMContext):
+    logger.info("Selecting time for daily word")
+
+    # Guardar en persistencia la seleccion
+    selected_time = callback.data.split(":")[1]
+    if selected_time is None:
+        raise MenukeyboardException("Error getting time selected for scheduled daily word")
+
+    logger.info(f"Selected: {selected_time}")
+
+    # Cambiar el estado guardado a activado
+    data = await state.get_data()
+    config_draft = ReChatDiariaConfig.model_validate_json(data["config_data"])
+    config_draft.scheduleTime = time(hour=int(selected_time), minute=0)
+
+    # Save draft back to FSM
+    await state.update_data(config_data=config_draft.model_dump_json())
+    await state.set_state(DailyMenuFlow.config_choosing)
+
+    # Reload main keyboard
+    await callback.message.edit_text(
+        build_menu_text(config_draft),
+        reply_markup = await buildDiariaKeyboardMenu()
+    )
 
 # -------------------------- END OF TIME CONFIG HANDLERS --------------------------
 

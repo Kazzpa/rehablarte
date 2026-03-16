@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field
 from typing import Literal, Union
-from datetime import datetime
+from datetime import datetime, time
 
 # Representation of a diaria word configuration
 class ReChatDiariaConfig(BaseModel):
     isActive: bool
     repetition: int = 0 # 0 No repetition
-    scheduleTime: datetime # TODO: check if this is appropiate type
+    scheduleTime: time # hour of the day to send the message
     senses: bool = False # Whether the bot should display the meaning of the word
     origin: bool = False # Whether the bot should display the origin of the word
 
@@ -29,7 +29,7 @@ class ReChat(BaseModel):
         isActive=False,
         origin=False,
         senses=False,
-        scheduleTime=datetime.now(),
+        scheduleTime=time(hour=17, minute=48), # hora coño
         repetition=0
     )
 
