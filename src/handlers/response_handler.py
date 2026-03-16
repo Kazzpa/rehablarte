@@ -42,7 +42,7 @@ async def echo_handler(message: Message) -> None:
         api_function=tts.get_audio_bytes,
         text=text,
         ttl=3600,  # Cache for 1 hour
-        result_type=bytes
+        result_type=bytes,
     )
     title_generated = message.from_user.first_name or "Usuario" + " generado"
     await message.bot.send_audio(

@@ -25,7 +25,9 @@ class ReSessionRepository:
         return f"session_chat_id:{chat_id}"
 
     async def save(self, session: ReChatSession):
-        await self.repo.save(self._key(session.chat.id), session.model_dump(mode="json"))
+        await self.repo.save(
+            self._key(session.chat.id), session.model_dump(mode="json")
+        )
 
     async def get(self, chat_id: int) -> ReChatSession | None:
         data = await self.repo.get(self._key(chat_id))

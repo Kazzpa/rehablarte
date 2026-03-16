@@ -3,13 +3,17 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 from datetime import time
-from errors.errors import MenukeyboardException, ReHablarteMappingException, RehablarteApiRaeException
+from errors.errors import (
+    MenukeyboardException,
+    ReHablarteMappingException,
+    RehablarteApiRaeException,
+)
 from handlers.fsm_conversation_handler import DailyMenuFlow
 from handlers.keyboards_handler import (
     buildClockSelectionKeyboard,
     buildDiariaKeyboardMenu,
     buildNumberOfRepeatsKeyboardMenu,
-    build_menu_text
+    build_menu_text,
 )
 from api.api_rae import get_rae_random
 from models.chat_entity import ReChatSession
@@ -24,6 +28,7 @@ from utils.redis_cache import cached_api_call
 daily_config_router = Router()
 
 # -------------------------- ACTIVATION CALLBACKS HANDLERS --------------------------
+
 
 @daily_config_router.callback_query(DailyMenuFlow.config_choosing, F.data == "activate")
 async def activate_daily(callback: CallbackQuery, state: FSMContext):
@@ -40,8 +45,8 @@ async def activate_daily(callback: CallbackQuery, state: FSMContext):
     rae_data = await cached_api_call(
         cache_key=cache_key,
         api_function=get_rae_random,
-        ttl=seconds_until_midnight, # Cache for until midnight
-        result_type=PalabraSimple
+        ttl=seconds_until_midnight,  # Cache for until midnight
+        result_type=PalabraSimple,
     )
 
     if not rae_data:
@@ -49,7 +54,7 @@ async def activate_daily(callback: CallbackQuery, state: FSMContext):
 
     if not isinstance(rae_data, PalabraSimple):
         raise ReHablarteMappingException("Error mapping response type")
-    
+
     # Cambiar el estado guardado a activado
     data = await state.get_data()
     config_draft = ReChatDiariaConfig.model_validate_json(data["config_data"])
@@ -59,8 +64,7 @@ async def activate_daily(callback: CallbackQuery, state: FSMContext):
     await state.update_data(config_data=config_draft.model_dump_json())
     # return to first menu
     await callback.message.edit_text(
-        build_menu_text(config_draft),
-        reply_markup = await buildDiariaKeyboardMenu()
+        build_menu_text(config_draft), reply_markup=await buildDiariaKeyboardMenu()
     )
 
 
@@ -84,13 +88,14 @@ async def deactivate_daily(callback: CallbackQuery, state: FSMContext):
 
     # return to first menu
     await callback.message.edit_text(
-        build_menu_text(config_draft),
-        reply_markup = await buildDiariaKeyboardMenu()
+        build_menu_text(config_draft), reply_markup=await buildDiariaKeyboardMenu()
     )
+
 
 # -------------------------- END OF ACTIVATION CALLBACK HADNLERS --------------------------
 
 # -------------------------- TIME CONFIG HANDLERS --------------------------
+
 
 @daily_config_router.callback_query(
     DailyMenuFlow.config_choosing, F.data == "timeconfig"
@@ -119,7 +124,9 @@ async def time_config_confirm(callback: CallbackQuery, state: FSMContext):
     # Guardar en persistencia la seleccion
     selected_time = callback.data.split(":")[1]
     if selected_time is None:
-        raise MenukeyboardException("Error getting time selected for scheduled daily word")
+        raise MenukeyboardException(
+            "Error getting time selected for scheduled daily word"
+        )
 
     logger.info(f"Selected: {selected_time}")
 
@@ -134,13 +141,14 @@ async def time_config_confirm(callback: CallbackQuery, state: FSMContext):
 
     # Reload main keyboard
     await callback.message.edit_text(
-        build_menu_text(config_draft),
-        reply_markup = await buildDiariaKeyboardMenu()
+        build_menu_text(config_draft), reply_markup=await buildDiariaKeyboardMenu()
     )
+
 
 # -------------------------- END OF TIME CONFIG HANDLERS --------------------------
 
 # -------------------------- REPETITION CONFIG HANDLERS --------------------------
+
 
 @daily_config_router.callback_query(
     DailyMenuFlow.config_choosing, F.data == "repetitionconfig"
@@ -159,6 +167,7 @@ async def repetition_config_selected(callback: CallbackQuery, state: FSMContext)
 
     # set FSM state
     await state.set_state(DailyMenuFlow.confirming)
+
 
 @daily_config_router.callback_query(DailyMenuFlow.confirming, F.data.regexp("[1-4]"))
 async def number_repetition_selected(callback: CallbackQuery, state: FSMContext):
@@ -182,8 +191,7 @@ async def number_repetition_selected(callback: CallbackQuery, state: FSMContext)
 
     # Reload main keyboard
     await callback.message.edit_text(
-        build_menu_text(config_draft),
-        reply_markup = await buildDiariaKeyboardMenu()
+        build_menu_text(config_draft), reply_markup=await buildDiariaKeyboardMenu()
     )
 
 
@@ -191,13 +199,15 @@ async def number_repetition_selected(callback: CallbackQuery, state: FSMContext)
 async def cancel_repetition_selection(callback: CallbackQuery, state: FSMContext):
     logger.info("Number of repetion selection cancelled")
     await state.set_state(DailyMenuFlow.config_choosing)
-    await callback.message.edit_text("❌ Seleccion cancelada",
-        reply_markup = await buildDiariaKeyboardMenu()
+    await callback.message.edit_text(
+        "❌ Seleccion cancelada", reply_markup=await buildDiariaKeyboardMenu()
     )
+
 
 # -------------------------- END OF REPETITION CALLBACK HANDLERS --------------------------
 
 # -------------------------- USER SELELECTS SENSES/ORIGIN CALLBACK HANDLERS --------------------------
+
 
 @daily_config_router.callback_query(DailyMenuFlow.config_choosing, F.data == "senses")
 async def senses_config_selected(callback: CallbackQuery, state: FSMContext):
@@ -215,10 +225,9 @@ async def senses_config_selected(callback: CallbackQuery, state: FSMContext):
     await state.update_data(config_data=config_draft.model_dump_json())
     # return to first menu
     await callback.message.edit_text(
-        build_menu_text(config_draft),
-        reply_markup = await buildDiariaKeyboardMenu()
+        build_menu_text(config_draft), reply_markup=await buildDiariaKeyboardMenu()
     )
-    
+
 
 # Function to configure origin
 @daily_config_router.callback_query(DailyMenuFlow.config_choosing, F.data == "origin")
@@ -237,14 +246,15 @@ async def origin_config_selected(callback: CallbackQuery, state: FSMContext):
     await state.update_data(config_data=config_draft.model_dump_json())
     # return to first menu
     await callback.message.edit_text(
-        build_menu_text(config_draft),
-        reply_markup = await buildDiariaKeyboardMenu()
+        build_menu_text(config_draft), reply_markup=await buildDiariaKeyboardMenu()
     )
+
 
 # -------------------------- END OF ORIGIN/SENSES CALLBACK HANDLERS --------------------------
 
 
 # -------------------------- FINAL STATES --------------------------
+
 
 @daily_config_router.callback_query(DailyMenuFlow.config_choosing, F.data == "cancel")
 async def cancel_selected(callback: CallbackQuery, state: FSMContext):
@@ -256,7 +266,9 @@ async def cancel_selected(callback: CallbackQuery, state: FSMContext):
 
 
 @daily_config_router.callback_query(DailyMenuFlow.config_choosing, F.data == "confirm")
-async def confirm_selected(callback: CallbackQuery, state: FSMContext, session: ReChatSession):
+async def confirm_selected(
+    callback: CallbackQuery, state: FSMContext, session: ReChatSession
+):
     logger.info("Confirm configuration")
     # Get draft
     data = await state.get_data()
@@ -271,8 +283,8 @@ async def confirm_selected(callback: CallbackQuery, state: FSMContext, session: 
     await state.clear()
 
 
-
 ### TODO: UNUSED FUNCTIONS - Should probably remove later --------------------------
+
 
 # Functions to confirm or cancel an option
 @daily_config_router.callback_query(DailyMenuFlow.confirming, F.data == "yes")

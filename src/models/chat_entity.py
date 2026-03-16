@@ -2,13 +2,15 @@ from pydantic import BaseModel, Field
 from typing import Literal, Union
 from datetime import datetime, time
 
+
 # Representation of a diaria word configuration
 class ReChatDiariaConfig(BaseModel):
     isActive: bool
-    repetition: int = 0 # 0 No repetition
-    scheduleTime: time # hour of the day to send the message
-    senses: bool = False # Whether the bot should display the meaning of the word
-    origin: bool = False # Whether the bot should display the origin of the word
+    repetition: int = 0  # 0 No repetition
+    scheduleTime: time  # hour of the day to send the message
+    senses: bool = False  # Whether the bot should display the meaning of the word
+    origin: bool = False  # Whether the bot should display the origin of the word
+
 
 # Representation of group chat users
 class ReChatMember(BaseModel):
@@ -29,8 +31,8 @@ class ReChat(BaseModel):
         isActive=False,
         origin=False,
         senses=False,
-        scheduleTime=time(hour=17, minute=48), # hora coño
-        repetition=0
+        scheduleTime=time(hour=17, minute=48),  # hora coño
+        repetition=0,
     )
 
 
@@ -46,6 +48,7 @@ class ReChatGroup(ReChat):
     active: bool = False
     chat_members: list[ReChatMember]
     type: Literal["group", "supergroup"]
+
 
 # Set up union
 ChatUnion = Union[RePrivateChat, ReChatGroup]

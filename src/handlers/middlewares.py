@@ -40,4 +40,3 @@ class InitializeSessionMiddleware(BaseMiddleware):
             session.is_dirty = False
 
         return result
-    

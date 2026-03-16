@@ -13,10 +13,12 @@ class Origin(BaseModel):
     :param voice: voice
     :param text: text
     """
+
     raw: str
     type: str
     voice: str
     text: str
+
 
 class Sense(BaseModel):
     """
@@ -29,12 +31,14 @@ class Sense(BaseModel):
     :param synonyns: Lista de sinonimos
     :param antonyns: Lista de antonimos
     """
+
     raw: str
     category: str
     usage: str | None
     description: str
     synonyms: list[str] | None
     antonyms: list[str] | None
+
 
 class PalabraSimple(BaseModel):
     """
@@ -43,7 +47,9 @@ class PalabraSimple(BaseModel):
 
     :param word: palabra buscada
     """
+
     word: str
+
 
 # Clase modelando el objeto padre
 class Palabra(BaseModel):
@@ -59,10 +65,12 @@ class Palabra(BaseModel):
     :param suggestions: Unkown
     :type suggestions: str
     """
+
     word: str
     sensesList: list[Sense] | None
-    origin: Origin | None= None
+    origin: Origin | None = None
     suggestions: str | None = None
+
 
 # For the mapper we expect a json with a defined structure as we will parse the values manually
 def mapJsonToPalabra(meanings, word, suggestionsStr=None) -> Palabra:

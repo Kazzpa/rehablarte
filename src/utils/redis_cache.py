@@ -6,7 +6,9 @@ import redis
 import pickle
 
 
-async def cached_api_call(cache_key: str, api_function, *args, ttl=600, result_type=None, **kwargs):
+async def cached_api_call(
+    cache_key: str, api_function, *args, ttl=600, result_type=None, **kwargs
+):
     # Try to get from cache
     try:
         cached = await redis_client.get(cache_key)
@@ -27,8 +29,8 @@ async def cached_api_call(cache_key: str, api_function, *args, ttl=600, result_t
 
     # Serialize based on what result is
     if hasattr(result, "model_dump"):
-         # Pydantic model
-        serialized = json.dumps(result.model_dump(mode="json")) 
+        # Pydantic model
+        serialized = json.dumps(result.model_dump(mode="json"))
     elif isinstance(result, (dict, list, str)):
         # plain types
         serialized = json.dumps(result)
@@ -42,7 +44,7 @@ async def cached_api_call(cache_key: str, api_function, *args, ttl=600, result_t
                 await redis_client.setex(cache_key, ttl, pickle.dumps(result))
             else:
                 await redis_client.set(cache_key, pickle.dumps(result))
-        return result               
+        return result
     else:
         raise TypeError(f"Cannot serialize result of type {type(result)}")
 

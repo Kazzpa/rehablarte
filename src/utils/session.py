@@ -65,6 +65,7 @@ async def update_session(session: ReChatSession):
     session_repo = ReSessionRepository(redis_repo)
     await session_repo.save(session=session)
 
+
 # Factory method to create sessions
 async def initialize_new_session(chat: Chat) -> ReChatSession:
     logger.info("Initializing new session")

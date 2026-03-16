@@ -105,25 +105,28 @@ async def get_daily_word(message: Message, session: ReChatSession) -> None:
     rae_data = await cached_api_call(
         cache_key=cache_key,
         api_function=function_cb,
-        ttl=seconds_until_midnight(), # Cache for until midnight
-        result_type=res_type
+        ttl=seconds_until_midnight(),  # Cache for until midnight
+        result_type=res_type,
     )
 
     if not isinstance(rae_data, PalabraSimple):
-        raise ReHablarteMappingException("Error mapping the type of the object after api call")
+        raise ReHablarteMappingException(
+            "Error mapping the type of the object after api call"
+        )
 
     palabro = rae_data.word
     await message.answer(f"El palabro de hoy es: {palabro}")
 
 
 @member_commands.message(Command("setdiaria"))
-async def config_daily_word(message: Message, state: FSMContext, session: ReChatSession) -> None:
+async def config_daily_word(
+    message: Message, state: FSMContext, session: ReChatSession
+) -> None:
     """ """
     logger.info("Calling config of diaria word")
 
     # Get the keyboard, set state inside
     await startDiariaBuildMenu(message, state, session=session)
-
 
 
 @member_commands.message(Command("aleatoria"))
@@ -165,21 +168,21 @@ async def process_word(message: Message, state: FSMContext) -> None:
     temp_msg = await message.answer("Espera le estoy preguntando a Reverte")
     word = message.text
     logger.info(f"Searching for word '{word}' in API")
-    cache_key = cache_keys_prefix.rae_word_key + " " +  word.lower().strip()
+    cache_key = cache_keys_prefix.rae_word_key + " " + word.lower().strip()
 
     rae_data = await cached_api_call(
         cache_key=cache_key,
         api_function=get_rae_word,
         word=word,
-        ttl=3600, # Cache for 1 hour
-        result_type=Palabra
+        ttl=3600,  # Cache for 1 hour
+        result_type=Palabra,
     )
     if not rae_data:
         raise RehablarteApiRaeException("Error calling rae api for word")
 
     if not isinstance(rae_data, Palabra):
         raise ReHablarteMappingException("Error mapping response type")
-    
+
     # TODO: Move this to a constant
     if rae_data == "NOT_FOUND":
         logger.warning("Word not found in rae api")

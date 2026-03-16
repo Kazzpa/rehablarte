@@ -7,7 +7,9 @@ from errors.errors import MenukeyboardException
 from models.chat_entity import ReChatDiariaConfig, ReChatSession
 
 
-async def startDiariaBuildMenu(message: Message, state: FSMContext, session: ReChatSession) -> None:
+async def startDiariaBuildMenu(
+    message: Message, state: FSMContext, session: ReChatSession
+) -> None:
     """ """
     try:
         logger.info("Starting diaria setting menu process")
@@ -24,6 +26,7 @@ async def startDiariaBuildMenu(message: Message, state: FSMContext, session: ReC
         raise MenukeyboardException(
             "Error building keyboard menu", menu_name="diariaKeyboardMenu"
         ) from e
+
 
 async def buildDiariaKeyboardMenu() -> InlineKeyboardMarkup:
     """ """
@@ -100,28 +103,28 @@ async def buildNumberOfRepeatsKeyboardMenu() -> InlineKeyboardMarkup:
             "Error building keyboard menu", menu_name="NumberOfRepetsKeybardMenu"
         ) from e
 
+
 # Builds the keyboard menu for selecting a time in for the daily word
 async def buildClockSelectionKeyboard() -> InlineKeyboardMarkup:
     rows = []
     hours = [f"{h:02d}:00" for h in range(24)]
-    
-    hoursPerBtn = 4 # Increment
+
+    hoursPerBtn = 4  # Increment
     for i in range(0, len(hours), hoursPerBtn):
         row = []
-        for hour in hours[i:i+hoursPerBtn]:
+        for hour in hours[i : i + hoursPerBtn]:
             col = InlineKeyboardButton(text=hour, callback_data=f"time:{hour}")
             row.append(col)
         rows.append(row)
-    
+
     # append buttons in last row
     rows.append([InlineKeyboardButton(text="❌ Cancelar", callback_data="cancel")])
-    
+
     # build keyboard
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=rows
-    )
-    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=rows)
+
     return keyboard
+
 
 # Generic function to generate a yes/no keyboard
 async def buildGenericResponseKeyboard() -> InlineKeyboardMarkup:
@@ -136,11 +139,16 @@ async def buildGenericResponseKeyboard() -> InlineKeyboardMarkup:
     )
     return keyboard
 
+
 def build_menu_text(config: ReChatDiariaConfig) -> str:
     lines = ["¿Que opcion quieres configurar?\n"]
     lines.append(f"{'✅' if config.isActive else '❌'} Palabra diaria activa")
-    lines.append(f"🕐 Hora: {config.scheduleTime.strftime('%H:%M') if config.scheduleTime else 'No configurada'}")
-    lines.append(f"🔁 Repeticion: {config.repetition if config.repetition else 'Sin repeticion'}")
+    lines.append(
+        f"🕐 Hora: {config.scheduleTime.strftime('%H:%M') if config.scheduleTime else 'No configurada'}"
+    )
+    lines.append(
+        f"🔁 Repeticion: {config.repetition if config.repetition else 'Sin repeticion'}"
+    )
     lines.append(f"{'✅' if config.senses else '❌'} Mostrar significado")
     lines.append(f"{'✅' if config.origin else '❌'} Mostrar origen")
     return "\n".join(lines)
