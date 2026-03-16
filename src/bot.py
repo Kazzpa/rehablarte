@@ -35,7 +35,7 @@ dp.include_router(daily_config_router)
 dp.include_router(response_handler)
 dp.include_router(event_router)
 # middlewares
-dp.update.middleware(InitializeSessionMiddleware())
+dp.update.middleware(InitializeSessionMiddleware(bot=bot))
 dp.startup.register(setup_bot_commands)
 
 

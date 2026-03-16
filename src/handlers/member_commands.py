@@ -1,4 +1,3 @@
-import json
 from loguru import logger
 from aiogram import html, Router, Bot
 from aiogram.filters import CommandStart, Command
@@ -12,7 +11,7 @@ from models.chat_entity import ReChatSession
 from decorators import log_duration
 from handlers.fsm_conversation_handler import RaeState
 from handlers.keyboards_handler import startDiariaBuildMenu
-from utils.common import cache_keys_prefix, seconds_until_midnight
+from utils.common import cache_keys_prefix, seconds_until_midnight, sendDailyWord
 
 
 # this function set ups the help text in commands
@@ -92,30 +91,7 @@ async def get_daily_word(message: Message, session: ReChatSession) -> None:
     """
     logger.info("Calling diaria command")
 
-    res_type = PalabraSimple
-    function_cb = get_rae_random
-    # Comprobar configuracion
-    if session.chat.diariaConfig.senses | session.chat.diariaConfig.origin:
-        res_type = Palabra
-        function_cb = get_rae_word
-
-    # comprobar si la palabra diaria se ha guardado ya
-    cache_key = cache_keys_prefix.rae_random_key
-
-    rae_data = await cached_api_call(
-        cache_key=cache_key,
-        api_function=function_cb,
-        ttl=seconds_until_midnight(),  # Cache for until midnight
-        result_type=res_type,
-    )
-
-    if not isinstance(rae_data, PalabraSimple):
-        raise ReHablarteMappingException(
-            "Error mapping the type of the object after api call"
-        )
-
-    palabro = rae_data.word
-    await message.answer(f"El palabro de hoy es: {palabro}")
+    await sendDailyWord(session=session, bot=message.bot)
 
 
 @member_commands.message(Command("setdiaria"))

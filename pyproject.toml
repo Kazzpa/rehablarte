@@ -16,7 +16,8 @@ dependencies = [
     "loguru",
     "requests",
     "ruff",
-    "redis"
+    "redis",
+    "apscheduler"
 ]
 
 [project.scripts]
