@@ -26,6 +26,7 @@ def seconds_until_midnight() -> int:
     midnight += timedelta(days=1)
     return int((midnight - now).total_seconds())
 
+
 # function to send daily word
 async def sendDailyWord(session: ReChatSession, bot: Bot):
     logger.info("Sending daily word...")
@@ -46,7 +47,7 @@ async def sendDailyWord(session: ReChatSession, bot: Bot):
         result_type=res_type,
     )
 
-    if not isinstance(rae_data, PalabraSimple | Palabra):
+    if not isinstance(rae_data, (PalabraSimple, Palabra)):
         raise ReHablarteMappingException(
             "Error mapping the type of the object after api call"
         )

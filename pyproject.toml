@@ -14,7 +14,7 @@ dependencies = [
     "onnxruntime",
     "faster-whisper",
     "loguru",
-    "requests",
+    "httpx",
     "ruff",
     "redis",
     "apscheduler"

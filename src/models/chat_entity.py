@@ -10,6 +10,7 @@ class ReChatDiariaConfig(BaseModel):
     scheduleTime: time  # hour of the day to send the message
     senses: bool = False  # Whether the bot should display the meaning of the word
     origin: bool = False  # Whether the bot should display the origin of the word
+    cronjob_id: str | None = None  # Cronjob id to identify each cronjob
 
 
 # Representation of group chat users
@@ -33,6 +34,7 @@ class ReChat(BaseModel):
         senses=False,
         scheduleTime=time(hour=17, minute=48),  # hora coño
         repetition=0,
+        cronjob_id=None,
     )
 
 

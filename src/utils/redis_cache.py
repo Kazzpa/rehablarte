@@ -20,6 +20,7 @@ async def cached_api_call(
             return data
     except (redis.RedisError, json.JSONDecodeError) as e:
         logger.warning(f"Cache retrieval failed for {cache_key}: {e}")
+        raise e
 
     # Execute API call - check if async or sync
     if inspect.iscoroutinefunction(api_function):

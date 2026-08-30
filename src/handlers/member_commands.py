@@ -49,6 +49,7 @@ async def setup_bot_commands(bot: Bot):
 member_commands = Router()
 
 
+# TODO: Change this command to check bot status for configs
 @member_commands.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     """

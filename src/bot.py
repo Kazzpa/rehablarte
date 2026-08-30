@@ -13,7 +13,9 @@ from handlers.errors_handler import errors_router
 from handlers.event_handler import event_router
 from handlers.middlewares import InitializeSessionMiddleware
 from modules.redis_db import storage
+from modules.http_client import get_async_client, close_async_client
 from handlers.conversation_handler import daily_config_router
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 load_dotenv()  # Auto-loads .env
 
@@ -22,8 +24,10 @@ TOKEN = getenv("BOT_TOKEN")
 if not TOKEN:
     raise ValueError("BOT_TOKEN not found in .env file!")
 
-# Bot defined globally (accessible to all handlers)
+# Bot, http client and scheduler defined globally (accessible to all handlers)
 bot = None
+client = None
+scheduler = AsyncIOScheduler()
 
 # Configure dispatcher and set up commands/middlewares | We set the storage sesssion as well
 dp = Dispatcher(storage=storage)
@@ -35,7 +39,7 @@ dp.include_router(daily_config_router)
 dp.include_router(response_handler)
 dp.include_router(event_router)
 # middlewares
-dp.update.middleware(InitializeSessionMiddleware(bot=bot))
+dp.update.middleware(InitializeSessionMiddleware(bot=bot, scheduler=scheduler))
 dp.startup.register(setup_bot_commands)
 
 
@@ -45,8 +49,19 @@ async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     logger.info("Starting bot!")
 
-    # And the run events dispatching
-    await dp.start_polling(bot)
+    # start scheduler
+    scheduler.start()
+    # start http client
+    get_async_client()
+
+    try:
+        # And the run events dispatching
+        await dp.start_polling(bot)
+    finally:
+        logger.info("Bot is stopping...")
+        scheduler.shutdown(wait=False)
+        await close_async_client()
+        await bot.session.close()
 
 
 if __name__ == "__main__":

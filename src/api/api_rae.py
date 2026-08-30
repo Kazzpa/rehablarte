@@ -1,4 +1,4 @@
-import requests
+import httpx
 from loguru import logger
 from api.config import (
     rae_api_url_base,
@@ -8,6 +8,7 @@ from api.config import (
 )
 from models.palabra_entity import mapJsonToPalabra, Palabra
 from errors.errors import RehablarteApiRaeException
+from modules.http_client import get_async_client
 
 
 async def get_rae_random() -> str:
@@ -16,18 +17,17 @@ async def get_rae_random() -> str:
     """
     try:
         logger.info("Calling API RAE - random word")
-        # Define url
-        url = rae_api_url_base + rae_api_url_random
-        headers = {"Accept": "application/json"}
+        # get the client
+        client = get_async_client()
         # call the api
-        response = requests.get(url, headers=headers)
+        response = await client.get(url=rae_api_url_random)
 
         # If different response code log it and throw exception
         if response.status_code != 200:
             raise RehablarteApiRaeException(
-                f"Error in response, failed with status code: {response.status_code} in RAE API {url}",
+                f"Error in response, failed with status code: {response.status_code} in RAE API {rae_api_url_random}",
                 status_code=response.status_code,
-                url_origin=url,
+                url_origin=rae_api_url_random,
             )
 
         logger.info("Response received with success!")
@@ -40,7 +40,7 @@ async def get_rae_random() -> str:
 
         return resultJson.get("data")
     except Exception as e:
-        logger.exception("Exception! - API RAE: ", extra={"url": url})
+        logger.exception("Exception! - API RAE: ", extra={"url": rae_api_url_random})
         raise e
 
 
@@ -54,11 +54,11 @@ async def get_rae_word(word: str) -> Palabra:
     """
     try:
         logger.info("Calling API RAE - Get words")
-        # the url is the get words + {palabra}
-        url = rae_api_url_base + rae_api_url_words + word
-        headers = {"Accept": "application/json"}
+        # get the client
+        client = get_async_client()
         # call the api
-        response = requests.get(url, headers=headers)
+        word_url = rae_api_url_words + word
+        response = await client.get(url=word_url)
 
         # process api response
         if response.status_code != 200:
@@ -71,9 +71,9 @@ async def get_rae_word(word: str) -> Palabra:
                     # in this case avoid exception and re
                     return "NOT_FOUND"
             raise RehablarteApiRaeException(
-                f"Error in response, failed with status code: {response.status_code} in RAE API {url}",
+                f"Error in response, failed with status code: {response.status_code} in RAE API {word_url}",
                 status_code=response.status_code,
-                url_origin=url,
+                url_origin=rae_api_url_words,
             )
 
         # process response
@@ -97,7 +97,9 @@ async def get_rae_word(word: str) -> Palabra:
         )
     except Exception as e:
         raise RehablarteApiRaeException(
-            "Exception! - API RAE", status_code=response.status_code, url_origin=url
+            "Exception! - API RAE",
+            status_code=response.status_code,
+            url_origin=word_url,
         ) from e
 
 
@@ -110,18 +112,17 @@ async def get_rae_daily() -> Palabra:
     """
     try:
         logger.info("Calling API RAE - Daily")
-        # Define url
-        url = rae_api_url_base + rae_api_url_daily
-        headers = {"Accept": "application/json"}
+        # get the client
+        client = get_async_client()
         # call the api
-        response = requests.get(url, headers=headers)
+        response = await client.get(url=rae_api_url_random)
 
         # If different response code log it and throw exception
         if response.status_code != 200:
             raise RehablarteApiRaeException(
-                f"Error in response, failed with status code: {response.status_code} in RAE API {url}",
+                f"Error in response, failed with status code: {response.status_code} in RAE API {rae_api_url_daily}",
                 status_code=response.status_code,
-                url_origin=url,
+                url_origin=rae_api_url_daily,
             )
 
         logger.info("Response received with success!")
@@ -135,5 +136,7 @@ async def get_rae_daily() -> Palabra:
         return resultJson.get("data")
     except Exception as e:
         raise RehablarteApiRaeException(
-            "Exception! - API RAE", status_code=response.status_code, url_origin=url
+            "Exception! - API RAE",
+            status_code=response.status_code,
+            url_origin=rae_api_url_daily,
         ) from e
