@@ -4,6 +4,18 @@ from pydantic import BaseModel
 from errors.errors import ReHablarteMappingException
 
 
+
+class RelatedPalabra(BaseModel):
+    """
+    Clase que representa palabras relacionadas a otras palabras en la busqueda
+
+    :param word: string con la palabra
+    :param label: string con el uso o el coloquio
+    """
+
+    word: str
+    label: str | None = None
+
 class Origin(BaseModel):
     """
     Docstring for Origin
@@ -15,29 +27,36 @@ class Origin(BaseModel):
     """
 
     raw: str
-    type: str
-    voice: str
-    text: str
+    type: str | None = None
+    voice: str | None = None
+    text: str | None = None
 
 
 class Sense(BaseModel):
     """
-    Docstring for __init__
+    Docstring for Sense
 
     :param raw: Contenido la palabra en la rae
+    :param meaning_number: Numero de orden en los significados
     :param category: Verb, noun, etc
     :param usage: uso
     :param description: Unica descripcion
-    :param synonyns: Lista de sinonimos
-    :param antonyns: Lista de antonimos
+    :param synonyns: Lista de sinonimos (version antigua, se mantiene por compatibilidad)
+    :param antonyns: Lista de antonimos (version antigua, se mantiene por compatibilidad)
+    :param synonyns_v2: Lista de sinonimos String con objecto
+    :param antonyns_v2: Lista de sinonimos String con objecto
     """
 
     raw: str
-    category: str
-    usage: str | None
+    meaning_number: int
+    gender: str | None = None
+    category: str = None
+    usage: str | None = None
     description: str
-    synonyms: list[str] | None
-    antonyms: list[str] | None
+    synonyms: list[str] | None = None
+    antonyms: list[str] | None = None
+    synonyms_v2: list[RelatedPalabra] | None = None
+    antonyms_v2: list[RelatedPalabra] | None = None 
 
 
 class PalabraSimple(BaseModel):
@@ -68,7 +87,7 @@ class Palabra(BaseModel):
 
     word: str
     sensesList: list[Sense] | None
-    origin: Origin | None = None
+    origin: Origin | None
     suggestions: str | None = None
 
 
@@ -114,6 +133,7 @@ def mapJsonToPalabra(meanings, word, suggestionsStr=None) -> Palabra:
             suggestions=suggestionsStr,
         )
     except KeyError as e:
+        logger.error("Error in mapper")
         raise ReHablarteMappingException("Exception in palabra mapper") from e
 
 
@@ -141,6 +161,7 @@ def mapJsonToOrigin(json) -> Origin | None:
             text=json.get("text"),
         )
     except KeyError as e:
+        logger.error("Error in mapper")
         raise ReHablarteMappingException("Exception in origin mapper") from e
 
 
@@ -161,13 +182,50 @@ def mapJsonToSense(json) -> Sense | None:
             logger.warning("Skipping sense mapping as it is missing")
             return None
 
+        # Get synonyms v2 looping raw object
+        raw_synonyms_v2 = json.get("synonyms_v2")
+        if raw_synonyms_v2 is None:
+            synonyms_v2 = None
+        else:
+            synonyms_v2 = []
+            for word in json.get("synonyms_v2"):
+                synonyms_v2.append(mapJsonToRelatedPalabra(word))
+
+        # Get antonyms v2 looping raw object
+        raw_antonyms_v2 = json.get("antonyms_v2")
+        if raw_antonyms_v2 is None:
+            antonyms_v2 = None
+        else:
+            antonyms_v2 = []
+            for word in json.get("antonyms_v2"):
+                antonyms_v2.append(mapJsonToRelatedPalabra(word))
+
         return Sense(
             raw=json.get("raw"),
+            meaning_number=json.get("meaning_number"),
+            gender=json.get("gender"),
             category=json.get("category"),
             usage=json.get("usage"),
             description=json.get("description"),
             synonyms=json.get("synonyms"),
             antonyms=json.get("antonyms"),
+            synonyms_v2=synonyms_v2,
+            antonyms_v2=antonyms_v2
         )
     except KeyError as e:
+        logger.error("Error in mapper")
         raise ReHablarteMappingException("Exception in sense mapper") from e
+
+def mapJsonToRelatedPalabra(json) -> RelatedPalabra | None:
+    try:
+        logger.info("Mapping to RelatedPalabra")
+        if json is None:
+            logger.warning("Skipping RelatedPalabra mapper, raw is None")
+
+        return RelatedPalabra(
+            word=json.get("word"),
+            label=json.get("label")
+        )
+    except KeyError as e:
+        logger.error("Error in mapper")
+        raise ReHablarteMappingException("Exception in related palabra mapper") from e

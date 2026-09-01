@@ -93,7 +93,7 @@ async def get_rae_word(word: str) -> Palabra:
         return mapJsonToPalabra(
             resultData.get("meanings"),
             resultData.get("word"),
-            resultData.get("suggestions"),
+            resultData.get("suggestions")
         )
     except Exception as e:
         raise RehablarteApiRaeException(
@@ -115,7 +115,7 @@ async def get_rae_daily() -> Palabra:
         # get the client
         client = get_async_client()
         # call the api
-        response = await client.get(url=rae_api_url_random)
+        response = await client.get(url=rae_api_url_daily)
 
         # If different response code log it and throw exception
         if response.status_code != 200:

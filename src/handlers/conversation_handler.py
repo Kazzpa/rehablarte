@@ -45,10 +45,11 @@ async def activate_daily(callback: CallbackQuery, state: FSMContext):
     rae_data = await cached_api_call(
         cache_key=cache_key,
         api_function=get_rae_random,
-        ttl=seconds_until_midnight,  # Cache for until midnight
+        ttl=seconds_until_midnight(),  # Cache for until midnight
         result_type=PalabraSimple,
     )
 
+    # Just to check the api call was successfull
     if not rae_data:
         raise RehablarteApiRaeException("Error calling rae api for word")
 
@@ -58,6 +59,11 @@ async def activate_daily(callback: CallbackQuery, state: FSMContext):
     # Cambiar el estado guardado a activado
     data = await state.get_data()
     config_draft = ReChatDiariaConfig.model_validate_json(data["config_data"])
+    # if is already active cancel to avoid telegram errors
+    if (config_draft.isActive):
+        logger.warning("Daily word is already active")
+        return
+    
     config_draft.isActive = True
 
     # Save draft back to FSM
@@ -81,6 +87,10 @@ async def deactivate_daily(callback: CallbackQuery, state: FSMContext):
     # Cambiar el estado guardado a activado
     data = await state.get_data()
     config_draft = ReChatDiariaConfig.model_validate_json(data["config_data"])
+    # check if is already deactivated to avoid telegram errors
+    if (not config_draft.isActive):
+        logger.warning("Daily word already deactivated")
+        return
     config_draft.isActive = False
 
     # Save draft back to FSM
