@@ -30,3 +30,9 @@ class ReHablarteMappingException(Exception):
     def __init__(self, message, field: str = None):
         super().__init__(message)
         self.field = field
+
+# Exception for database validation/extraction
+class RehablarteRedisException(Exception):
+    def __init__(self, message, field: str = None):
+        super().__init__(message)
+        self.field = field

@@ -5,10 +5,11 @@ from httpcore import Origin
 from loguru import logger
 
 from api.api_rae import get_rae_daily, get_rae_word
-from errors.errors import ReHablarteMappingException
 from models.palabra_entity import Palabra, PalabraSimple, Sense
 from utils.redis_cache import cached_api_call
-from models.chat_entity import ReChatSession
+from utils.palabra import getPalabra, savePalabraTemp
+from models.chat_entity import ReChatDiariaConfig, ReChatSession
+from utils.session import update_session
 
 
 class cache_keys_prefix:
@@ -32,39 +33,36 @@ def seconds_until_midnight() -> int:
 async def sendDailyWord(session: ReChatSession, bot: Bot):
     logger.info("Sending daily word...")
     res_type = PalabraSimple
-    function_cb = get_rae_daily
+    config: ReChatDiariaConfig = session.chat.diariaConfig
     # Comprobar configuracion
-    if session.chat.diariaConfig.senses | session.chat.diariaConfig.origin:
+    if config.senses or config.origin:
         res_type = Palabra
-        function_cb = get_rae_word
 
-    # comprobar si la palabra diaria se ha guardado ya
-    cache_key = cache_keys_prefix.rae_word_key
-#TODO: Bug here, we need to change the save method, we need to check the type of the word
-    rae_data = await cached_api_call(
-        cache_key=cache_key,
-        api_function=function_cb,
-        ttl=seconds_until_midnight(),  # Cache for until midnight
-        result_type=res_type,
-    )
+    # check if we have the word already
+    if config.last_palabra is not None:
+        word: Palabra | PalabraSimple | None = await getPalabra(config.last_palabra)
+    else:
+        word = None
 
-    origin = None
-    senses = None
-    if not isinstance(rae_data, (PalabraSimple, Palabra)):
-        raise ReHablarteMappingException(
-            "Error mapping the type of the object after api call"
-        )
-    elif isinstance(rae_data, Palabra):
-        origin = rae_data.origin
-        senses = rae_data.sensesList
+    if word is None:
+        # call the api
+        word: PalabraSimple = await get_rae_daily()
+        if res_type is Palabra:
+            word: Palabra = await get_rae_word(word.word)
 
-    palabro = rae_data.word
-    mensaje = palabraStrBuilder(palabro, origin, senses)
-
-    await bot.send_message(session.chat.id,  mensaje)
+        # save the word
+        await savePalabraTemp(word)
+        config.last_palabra = word.word
+        # update session
+        session.is_dirty = True
+        await update_session(session)
+        
+    
+    mensaje = palabraStrBuilder(word.word, getattr(word, "origin", None), getattr(word, "sensesList", None))
+    await bot.send_message(session.chat.id, mensaje)
 
 
-def palabraStrBuilder(word: str, origin: Origin, senses: list[Sense]) -> str:
+def palabraStrBuilder(word: str, origin: Origin | None, senses: list[Sense] | None) -> str:
     """
     Util function to build a message to send with the sense and origin of a word
 
@@ -79,7 +77,7 @@ def palabraStrBuilder(word: str, origin: Origin, senses: list[Sense]) -> str:
     # De momento damos un soporte sinple para origen y sinonimos
     if (origin is not None):
         lines.append(f"El origen del palabro de hoy es: {origin.raw}")
-    if (senses is not None and senses.count() > 0):
+    if (senses is not None and len(senses) > 0):
         for sense in senses:
             if sense.description is not None:
                 lines.append(f"El significado del palabro de hoy es: {sense.description}")

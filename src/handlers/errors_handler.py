@@ -18,7 +18,7 @@ async def errors_handler(event: ErrorEvent):
     if cause:
         logger.error(f"Error ocurred: {cause}")
     else:
-        logger.error(f"Internal Error - unkown cause {ex}")
+        logger.error(f"Internal Error - unkown cause - {ex}")
     try:
         if update.message:
             await update.message.answer("❌ Ocurrió un error interno.")

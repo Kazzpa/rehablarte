@@ -6,6 +6,7 @@ from datetime import datetime, time
 # Representation of a diaria word configuration
 class ReChatDiariaConfig(BaseModel):
     isActive: bool
+    last_palabra: str | None = None
     repetition: int = 0  # 0 No repetition
     scheduleTime: time  # hour of the day to send the message
     senses: bool = False  # Whether the bot should display the meaning of the word

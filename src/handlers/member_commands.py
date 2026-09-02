@@ -11,7 +11,7 @@ from models.chat_entity import ReChatSession
 from decorators import log_duration
 from handlers.fsm_conversation_handler import RaeState
 from handlers.keyboards_handler import startDiariaBuildMenu
-from utils.common import cache_keys_prefix, seconds_until_midnight, sendDailyWord
+from utils.common import cache_keys_prefix, sendDailyWord
 
 
 # this function set ups the help text in commands

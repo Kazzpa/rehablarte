@@ -1,5 +1,4 @@
 from loguru import logger
-from aiogram.fsm.context import FSMContext
 from aiogram.types.chat import Chat
 from errors.errors import RehablarteInternalException
 from models.chat_entity import (
@@ -12,25 +11,6 @@ from models.chat_entity import (
 from datetime import datetime
 from utils.redis_repository import ReSessionRepository, RedisRepository
 from modules.redis_db import redis_client
-
-
-# This function should check whether the chat is in session and then whether is saved in persistance
-async def check_session_persistance(state: FSMContext):
-    logger.info("Checking chat persistance")
-    session = await get_session(state)
-    if session is None:
-        raise RehablarteInternalException("Error - Session is not initialized")
-
-    if not session.is_dirty:
-        logger.info("Session is not diry - skipping persistance")
-        return
-
-    logger.info(f"Persisting session {session.chat.id} to DB")
-    redis_repo = RedisRepository(redis_client)
-    session_repo = ReSessionRepository(redis_repo)
-    await session_repo.save(session=session)
-    session.is_dirty = False
-    await update_session(session=session)
 
 
 # This function should return a member from the session chat, it assumes you already got the session and chat
@@ -46,7 +26,7 @@ async def get_member_from_chat(
         )
     )
 
-
+# Return a session
 async def get_session(chat_id: int) -> ReChatSession:
     logger.info("Getting session")
     redis_repo = RedisRepository(redis_client)
@@ -58,12 +38,21 @@ async def get_session(chat_id: int) -> ReChatSession:
 
     return ReChatSession.model_validate_json(data)
 
-
-async def update_session(session: ReChatSession):
-    logger.info("Updating session...")
+# Function to save the session always, whether is dirty or not
+async def save_session(session: ReChatSession):
+    logger.info("Saving session...")
     redis_repo = RedisRepository(redis_client)
     session_repo = ReSessionRepository(redis_repo)
     await session_repo.save(session=session)
+
+# Function to update dirty session, it expects a dirty session
+async def update_session(session: ReChatSession) -> None:
+    if session is None:
+        raise RehablarteInternalException("Error - Session is not initialized")
+
+    logger.info(f"Persisting session {session.chat.id} to DB")
+    await save_session(session=session)
+    session.is_dirty = False
 
 
 # Factory method to create sessions

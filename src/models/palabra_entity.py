@@ -91,6 +91,20 @@ class Palabra(BaseModel):
     suggestions: str | None = None
 
 
+def map_json_to_palanbraSimple(data) -> PalabraSimple:
+    """
+    Function to manually map json response from RAE API into an object
+
+    :param word: word
+    """
+    logger.info("Mapping to palabra simple")
+    if data is None:
+        logger.error("Error mapping the word to palabra simple, word is None")
+        raise ReHablarteMappingException("Error mapping to palabra simple")
+
+    return PalabraSimple(word=data.get("word"))
+
+
 # For the mapper we expect a json with a defined structure as we will parse the values manually
 def mapJsonToPalabra(meanings, word, suggestionsStr=None) -> Palabra:
     """

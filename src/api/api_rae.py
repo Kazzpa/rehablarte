@@ -1,12 +1,11 @@
 import httpx
 from loguru import logger
 from api.config import (
-    rae_api_url_base,
     rae_api_url_random,
     rae_api_url_words,
     rae_api_url_daily,
 )
-from models.palabra_entity import mapJsonToPalabra, Palabra
+from models.palabra_entity import PalabraSimple, map_json_to_palanbraSimple, mapJsonToPalabra, Palabra
 from errors.errors import RehablarteApiRaeException
 from modules.http_client import get_async_client
 
@@ -103,7 +102,7 @@ async def get_rae_word(word: str) -> Palabra:
         ) from e
 
 
-async def get_rae_daily() -> Palabra:
+async def get_rae_daily() -> PalabraSimple:
     """
     Docstring for get_rae_daily
 
@@ -133,7 +132,9 @@ async def get_rae_daily() -> Palabra:
                 f"Response received is empty or null: {resultJson}"
             )
 
-        return resultJson.get("data")
+        return map_json_to_palanbraSimple(
+            resultJson.get("data")
+        )
     except Exception as e:
         raise RehablarteApiRaeException(
             "Exception! - API RAE",
